@@ -208,7 +208,7 @@ Sample output:
 <p>ModuleName - ViewName</p>
 ```
 
-### CRUD
+### CRUD [WIP]
 Generate a full working example with Model, View and Controller with given name:
 ```bash
 "vendor/bin/laminas-cli.bat" mvc:crud --properties=<property1> --properties=<property2> --module=ModuleName <name>
@@ -225,5 +225,5 @@ New files in:
 
 Sample output:
 ```php
-<p>ModuleName - ViewName</p>
+[WIP]
 ```
