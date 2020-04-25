@@ -39,7 +39,7 @@ $ "vendor/bin/laminas.bat" [command-params] [command-name]
 ### Controller
 Generating sample controller with a list of available actions:
 ```bash
-"vendor/bin/laminas-cli.bat" mvc:controller --actions=<action1> --actions=<action2> <name> <moduleName>
+"vendor/bin/laminas-cli.bat" mvc:controller --actions=<action1> --actions=<action2> --module=ModuleName <name>
 ```
 New file in: `[root]/module/[moduleName]/src/Controller/[name].php`
 
@@ -69,7 +69,7 @@ class ControllerNameController extends \Laminas\Mvc\Controller\AbstractActionCon
 ### Model
 Generating sample model with a list of properties:
 ```bash
-"vendor/bin/laminas-cli.bat" mvc:model --properties=<property1> --properties=<property2> <name> <moduleName>
+"vendor/bin/laminas-cli.bat" mvc:model --properties=<property1> --properties=<property2> --module=ModuleName <name>
 ```
 New file in: `[root]/module/[moduleName]/src/Model/[name].php`
 
@@ -155,7 +155,7 @@ class ModelNameTable extends AbstractTable
 ### Rowset
 Generating sample rowset with a list of params:
 ```bash
-"vendor/bin/laminas-cli.bat" mvc:rowset --properties=<property1> --properties=<property2> <name> <moduleName>
+"vendor/bin/laminas-cli.bat" mvc:rowset --properties=<property1> --properties=<property2> --module=ModuleName <name>
 ```
 New file in: `[root]/module/[moduleName]/src/Model/Rowset/[name].php`
 
@@ -199,7 +199,7 @@ class RowsetName
 ### View
 Generating sample .phtml view file:
 ```bash
-"vendor/bin/laminas-cli.bat" mvc:view <controllerName> <name> <moduleName>
+"vendor/bin/laminas-cli.bat" mvc:view <controllerName> --module=ModuleName <name>
 ```
 New file in: `[root]/module/[moduleName]/view/[controllerName]/[name].phtml`
 
