@@ -37,7 +37,7 @@ $ "vendor/bin/laminas.bat" [command-params] [command-name]
 ## Available commands
 
 ### Controller
-Generating sample controller with a list of available actions:
+Generate sample controller with a list of available actions:
 ```bash
 "vendor/bin/laminas-cli.bat" mvc:controller --actions=<action1> --actions=<action2> --module=ModuleName <name>
 ```
@@ -67,7 +67,7 @@ class ControllerNameController extends \Laminas\Mvc\Controller\AbstractActionCon
 ```
 
 ### Model
-Generating sample model with a list of properties:
+Generate sample model with a list of properties:
 ```bash
 "vendor/bin/laminas-cli.bat" mvc:model --properties=<property1> --properties=<property2> --module=ModuleName <name>
 ```
@@ -153,7 +153,7 @@ class ModelNameTable extends AbstractTable
 ```
 
 ### Rowset
-Generating sample rowset with a list of params:
+Generate sample rowset with a list of params:
 ```bash
 "vendor/bin/laminas-cli.bat" mvc:rowset --properties=<property1> --properties=<property2> --module=ModuleName <name>
 ```
@@ -197,11 +197,31 @@ class RowsetName
 ```
 
 ### View
-Generating sample .phtml view file:
+Generate sample .phtml view file:
 ```bash
-"vendor/bin/laminas-cli.bat" mvc:view <controllerName> --module=ModuleName <name>
+"vendor/bin/laminas-cli.bat" mvc:view --module=ModuleName <controllerName> <name>
 ```
 New file in: `[root]/module/[moduleName]/view/[controllerName]/[name].phtml`
+
+Sample output:
+```php
+<p>ModuleName - ViewName</p>
+```
+
+### CRUD
+Generate a full working example with Model, View and Controller with given name:
+```bash
+"vendor/bin/laminas-cli.bat" mvc:crud --properties=<property1> --properties=<property2> --module=ModuleName <name>
+```
+New files in: 
+```
+[root]/module/[moduleName]/src/Controller/[name]Controller.php
+[root]/module/[moduleName]/src/Model/[name]Model.php
+[root]/module/[moduleName]/src/Model/Rowset/[name].php
+[root]/module/[moduleName]/view/[name]/index.phtml
+[root]/module/[moduleName]/view/[name]/edit.phtml
+[root]/module/[moduleName]/view/[name]/add.phtml
+```
 
 Sample output:
 ```php
