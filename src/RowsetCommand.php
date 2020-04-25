@@ -1,6 +1,6 @@
 <?php
 
-namespace Divix\Laminas\Cli;
+namespace Divix\Laminas\Cli\Command;
 
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;

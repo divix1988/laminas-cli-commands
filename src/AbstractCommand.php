@@ -1,6 +1,6 @@
 <?php
 
-namespace Divix\Laminas\Cli;
+namespace Divix\Laminas\Cli\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,7 +15,7 @@ use Laminas\Code\Generator\PropertyGenerator;
 
 class AbstractCommand extends Command
 {
-    const MODULE_SRC = __DIR__.'/../../../../../';
+    const MODULE_SRC = __DIR__.'/../../../../module/';
     const MODULE_CONTROLLER_SRC = '/src/Controller/';
     const MODULE_MODEL_SRC = '/src/Model/';
     const MODULE_ROWSET_SRC = '/src/Model/Rowset/';

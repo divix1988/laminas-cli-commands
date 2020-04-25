@@ -14,7 +14,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Divix\\Laminas\\Cli\\Command": "src/"
+            "Divix\\Laminas\\Cli\\Command\\": "src/"
         }
     }
 }
