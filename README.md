@@ -41,6 +41,8 @@ Generating sample controller with a list of available actions:
 ```bash
 "vendor/bin/laminas-cli.bat" mvc:controller --actions=<action1> --actions=<action2> <name> <moduleName>
 ```
+New file in: `[root]/module/[moduleName]/src/Controller/[name].php`
+
 Sample output:
 ```php
 namespace ModuleName\Controller\ControllerNameController;
@@ -69,6 +71,8 @@ Generating sample model with a list of properties:
 ```bash
 "vendor/bin/laminas-cli.bat" mvc:model --properties=<property1> --properties=<property2> <name> <moduleName>
 ```
+New file in: `[root]/module/[moduleName]/src/Model/[name].php`
+
 Sample output:
 ```php
 namespace ModuleName\Model;
@@ -153,6 +157,8 @@ Generating sample rowset with a list of params:
 ```bash
 "vendor/bin/laminas-cli.bat" mvc:rowset --properties=<property1> --properties=<property2> <name> <moduleName>
 ```
+New file in: `[root]/module/[moduleName]/src/Model/Rowset/[name].php`
+
 Sample output:
 ```php
 namespace ModuleName\Model;
@@ -196,6 +202,7 @@ Generating sample .phtml view file:
 "vendor/bin/laminas-cli.bat" mvc:view <controllerName> <name> <moduleName>
 ```
 New file in: `[root]/module/[moduleName]/view/[controllerName]/[name].phtml`
+
 Sample output:
 ```php
 <p>ModuleName - ViewName</p>
