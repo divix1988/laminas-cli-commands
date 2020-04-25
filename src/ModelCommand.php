@@ -16,7 +16,7 @@ use Laminas\Code\Generator\MethodGenerator;
 /**
  * Usage:
  * 
- * "vendor/bin/laminas-cli.bat" mvc:model --properties=<property1> --properties=<property2> <name> <moduleName>
+ * "vendor/bin/laminas-cli.bat" mvc:model --properties=<property1> --properties=<property2> --module=<moduleName> <name>
  */
 class ModelCommand extends AbstractCommand
 {

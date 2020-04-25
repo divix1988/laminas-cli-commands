@@ -15,7 +15,7 @@ use Laminas\Code\Generator\PropertyGenerator;
 /**
  * Usage:
  * 
- * "vendor/bin/laminas-cli.bat" mvc:controller --actions=<action1> --actions=<action2> <name>
+ * "vendor/bin/laminas-cli.bat" mvc:controller --actions=<action1> --actions=<action2> --module=<moduleName> <name>
  */
 class ControllerCommand extends AbstractCommand
 {
