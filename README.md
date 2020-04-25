@@ -54,12 +54,6 @@ Generating sample controller with a list of params:
 "vendor/bin/laminas-cli.bat" mvc:rowset --properties=<property1> --properties=<property2> <name> <moduleName>
 ```
 
-### Rowset
-Generating sample controller with a list of params:
-```bash
-"vendor/bin/laminas-cli.bat" mvc:rowset --properties=<property1> --properties=<property2> <name> <moduleName>
-```
-
 ### View
 Generating sample .phtml view file:
 ```bash
