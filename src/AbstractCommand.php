@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Output\ConsoleSectionOutput;
 
 use Laminas\Code\Generator\ClassGenerator;
 use Laminas\Code\Generator\DocBlockGenerator;
@@ -23,8 +24,24 @@ class AbstractCommand extends Command
     protected function configure()
     {
         $this->addOption('module', null, InputOption::VALUE_OPTIONAL, 'The module name of the component.');
+        $this->addOption('print_mode', null, InputOption::VALUE_OPTIONAL, 'Print only the generated file and don\'t store it.');
     }
     
+    protected function postExecute(InputInterface $input, OutputInterface $output, ConsoleSectionOutput &$section1, &$section2)
+    {
+        if ($this->getPrintMode($input)) {
+            $section1->clear();
+            $section2->clear();
+        }
+    }
+    
+    protected function getPrintMode($input)
+    {
+        $value = $input->getOption('print_mode');
+        
+        return (!empty($value) && $value == true);
+    }
+
     protected function getModuleName($input, $output, $componentName): string
     {
         $moduleName = $input->getOption('module');

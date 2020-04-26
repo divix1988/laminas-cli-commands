@@ -42,8 +42,23 @@ class ControllerCommand extends AbstractCommand
         
         $name = ucfirst($input->getArgument('name')) . 'Controller';
         $actions = $input->getOption('actions');
-        $methodActions = ['index'];
         
+        $controller = $this->getControllerObject($name, $moduleName, $actions);
+        
+        //$section2->writeln(trim(preg_replace('/\s\s+/', ' ', $controller->generate())));
+        $section2->writeln(str_replace("\n", '%new_line%', $controller->generate()));
+        
+        $this->storeControllerContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$controller->generate());
+        $section1->writeln('Done creating new controller [inside]!!!!!!!!!!!!!!!.');
+
+        parent::postExecute($input, $output, $section1, $section2);
+
+        return 0;
+    }
+    
+    protected function getControllerObject($name, $moduleName, $actions)
+    {
+        $methodActions = ['index'];
         $controller = new ClassGenerator();
         $controller->setName($name)
             ->setNamespaceName($moduleName . '\Controller\\' . $name)
@@ -59,12 +74,6 @@ class ControllerCommand extends AbstractCommand
                 $action . 'Action'
             );
         }
-        $section2->writeln($controller->generate());
-        
-        
-        $this->storeControllerContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$controller->generate());
-        $section2->writeln('Done creating new controller.');
-
-        return 0;
+        return $controller;
     }
 }
