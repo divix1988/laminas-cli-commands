@@ -55,10 +55,98 @@ class CrudControllerCommand extends ControllerCommand
         
         $controller->getMethod('indexAction')
             ->setBody(
-'return [
-    \'comics\' => $this->comicsTable->getBy([\'page\' => $this->params()->fromRoute(\'page\')])
-];'
+'$view = new ViewModel();
+$rows = $this->'.$name.'Table->getBy([\'page\' => $this->params()->fromRoute(\'page\')]);
+
+$view->setVariable(\''.$name.'\', $rows);
+
+return $view;'
             );
+        
+        $controller->getMethod('createAction')
+            ->setBody(
+'$request = $this->getRequest();
+$'.$name.'Form = new '.$name.'Form();
+$'.$name.'Form->get(\'submit\')->setValue(\'Add\');
+
+if (!$request->isPost()) {
+    return [\''.$name.'Form\' => $'.$name.'Form];
+}
+$'.$name.'Model = new '.$name.'();
+$'.$name.'Form->setInputFilter($'.$name.'Model->getInputFilter());
+$'.$name.'Form->setData($request->getPost());
+
+if (!$'.$name.'Form->isValid()) {
+    print_r($'.$name.'Form->getMessages());
+    return [\''.$name.'Form\' => $'.$name.'Form];
+}
+$'.$name.'Model->exchangeArray($'.$name.'Form->getData());
+$this->'.$name.'Table->save($'.$name.'Model);
+
+$this->redirect()->toRoute(\''.$name.'\');'
+            );
+        
+        
+        $controller->getMethod('updateAction')
+            ->setBody(
+'$view = new ViewModel();
+$userId = (int) $this->params()->fromRoute(\'id\');
+$view->setVariable(\'userId\', $userId);
+if ($userId == 0) {
+    return $this->redirect()->toRoute(\'users\', [\'action\' => \'add\']);
+}
+// get user data; if it doesn’t exists, then redirect back to the index
+try {
+    $userRow = $this->usersTable->getById($userId);
+} catch (\Exception $e) {
+    return $this->redirect()->toRoute(\'users\', [\'action\' => \'index\']);
+}
+$userForm = new UserForm();
+$userForm->bind($userRow);
+
+$userForm->get(\'submit\')->setAttribute(\'value\', \'Save\');
+$request = $this->getRequest();
+$view->setVariable(\'userForm\', $userForm);
+
+if (!$request->isPost()) {
+    return $view;
+}
+$userForm->setInputFilter($userRow->getInputFilter());
+$userForm->setData($request->getPost());
+
+if (!$userForm->isValid()) {
+    return $view;
+}
+$this->usersTable->save($userRow);
+// data saved, redirect to the users list page
+return $this->redirect()->toRoute(\'users\', [\'action\' => \'index\']);'
+          );
+        
+        
+        $controller->getMethod('deleteAction')
+            ->setBody(
+'$userId = (int) $this->params()->fromRoute(\'id\');
+
+if (empty($userId)) {
+    return $this->redirect()->toRoute(\'users\');
+}
+$request = $this->getRequest();
+
+if ($request->isPost()) {
+    $del = $request->getPost(\'del\', \'Cancel\');
+
+    if ($del == \'Delete\') {
+        $userId = (int) $request->getPost(\'id\');
+        $this->usersTable->delete($userId);
+    }
+    // redirect to the users list
+    return $this->redirect()->toRoute(\'users\');
+}
+return [
+    \'id\' => $userId,
+    \'user\' => $this->usersTable->getById($userId),
+];'
+          );
         
         $this->storeControllerContents($controllerName.'.php', $moduleName, '<?php'.PHP_EOL.$controller->generate());
 

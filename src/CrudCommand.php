@@ -66,6 +66,46 @@ class CrudCommand extends AbstractCommand
         $this->generateController($moduleName, $name, $output);
         $section1->writeln('End creating new Controller.');
         
+        $section1->writeln('Start creating new Model.');
+        //$this->generateModel($moduleName, $name, $output);
+        $section1->writeln('End creating new Model.');
+        
+        
+        $section1->writeln('Start creating Views for: index.phtml, create.phtml, update.phtml and delete.phtml.');
+        $this->generateView(
+            $moduleName, 
+            $name, 
+            $output,
+            'add',
+            [
+                'name_singular' => rtrim($name, 's'),
+                'name_plural' => $name,
+                'columns' => $properties
+            ]
+        );
+        $this->generateView(
+            $moduleName, 
+            $name, 
+            $output,
+            'delete',
+            [
+                'name_singular' => rtrim($name, 's'),
+                'name_plural' => $name
+            ]
+        );
+        $this->generateView(
+            $moduleName, 
+            $name, 
+            $output,
+            'edit',
+            [
+                'name_singular' => rtrim($name, 's'),
+                'name_plural' => $name,
+                'columns' => $properties
+            ]
+        );
+        $section1->writeln('End creating new Views.');
+        
         //$section2->writeln($model->generate());
         //$this->storeModelContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$model->generate());
         $section1->writeln('Done creating new CRUD.');
@@ -80,10 +120,46 @@ class CrudCommand extends AbstractCommand
         $arguments = [
             'command' => 'mvc:crud_controller2',
             'name' => $name,
-            '--actions' => ['add', 'edit', 'delete'],
+            '--actions' => ['create', 'update', 'delete'],
             '--module' => $moduleName,
             '--print_mode' => true
         ];
+
+        $greetInput = new ArrayInput($arguments);
+        $command->run($greetInput, $output);
+    }
+    
+    protected function generateModel($moduleName, $name, OutputInterface $output)
+    {
+        $command = $this->getApplication()->find('mvc:crud_model');
+
+        $arguments = [
+            'command' => 'mvc:crud_model',
+            'name' => $name,
+            '--actions' => ['create', 'update', 'delete'],
+            '--module' => $moduleName,
+            '--print_mode' => true
+        ];
+
+        $greetInput = new ArrayInput($arguments);
+        $command->run($greetInput, $output);
+    }
+    
+    protected function generateView($moduleName, $name, OutputInterface $output, $viewType, array $options)
+    {
+        $command = $this->getApplication()->find('mvc:crud_view');
+
+        $arguments = [
+            'command' => 'mvc:crud_view',
+            'name' => $viewType,
+            'controller' => $name,
+            '--module' => $moduleName,
+            '--print_mode' => true
+        ];
+        
+        foreach ($options as $key => $value) {
+            $arguments['--'.$key] = $value;
+        }
 
         $greetInput = new ArrayInput($arguments);
         $command->run($greetInput, $output);

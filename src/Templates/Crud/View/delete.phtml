@@ -1,0 +1,13 @@
+<div class="jumbotron">
+    <h1><span class="zf-green">Delete %name_singular_lower%</span></h1>
+    <p>
+        Confirm deletion of %name_singular_lower% with id: "<?= $%name_singular_lower%->getId() ?>"
+    </p>
+    <form action="<?= $this->url('%name_plural_lower%', ['action' => 'delete', 'id' => $id]) ?>" method="post">
+    <div class="form-group">
+        <input type="hidden" name="id" value="<?= (int) $%name_singular_lower%->getId() ?>" />
+            <input type="submit" class="btn btn-danger" name="del" value="Delete" />
+            <input type="submit" class="btn btn-success" name="del" value="Cancel" />
+        </div>
+    </form>
+</div>

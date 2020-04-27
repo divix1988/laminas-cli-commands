@@ -1,0 +1,27 @@
+<div class="jumbotron">
+    <h1><span class="zf-green">%name_plural%</span></h1>
+    <a href="<?= $this->url('%name_plural%', ['action' => 'add']) ?>">Add %name_singular%</a>
+    <table class="table">
+        <tr>
+        <th>Id</th>
+        
+        %table_columns_headings%
+        
+        <th>Actions</th>
+        
+        </tr>
+        <?php foreach ($%name_singular%Rows as $%name_singular%): ?>
+        <tr>
+            <td><?= $%name_singular%->getId() ?></td>
+            
+            //<td><?= $%name_singular%->getUsername() ?></td>
+            %table_columns%
+
+            <td>
+                <a href="<?= $this->url('%name_plural%', ['action' => 'edit', 'id' => $%name_singular%->getId()]) ?>">Edit</a> |
+                <a href="<?= $this->url('%name_plural%', ['action' => 'delete', 'id' => $%name_singular%->getId()]) ?>">Remove</a>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </table>
+</div>

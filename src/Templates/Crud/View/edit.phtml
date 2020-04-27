@@ -1,0 +1,19 @@
+<div class="jumbotron">
+    <h1><span class="zf-green">Edit %name_singular_lower% id: <?= $%name_singular_lower%Id ?></span></h1>
+    <?php
+        $%name_singular_lower%Form->setAttribute('action', $this->url('%name_plural_lower%',
+            [
+            'action' => 'edit',
+            'id' => $%name_singular_lower%Id
+            ]
+        ));
+        $%name_singular_lower%Form->prepare();
+        echo $this->form()->openTag($%name_singular_lower%Form);
+        echo $this->formHidden($%name_singular_lower%Form->get('id'));
+        
+%form_elements%
+        
+        echo $this->formSubmit($%name_singular_lower%Form->get('submit'));
+        echo $this->form()->closeTag();
+    ?>
+</div>
