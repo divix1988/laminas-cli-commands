@@ -281,7 +281,7 @@ Sample output:
 ```
 
 ### CRUD [WIP]
-Generate a full working example with Model, View and Controller with given name:
+Generate a full working example with Form, Rowset, Model, View and Controller with given name:
 ```bash
 "vendor/bin/laminas-cli.bat" mvc:crud --properties=<property1> --properties=<property2> --module=ModuleName <name>
 ```
@@ -289,13 +289,16 @@ New files in:
 ```
 [root]/module/[moduleName]/src/Controller/[name]Controller.php
 [root]/module/[moduleName]/src/Model/[name]Model.php
+[root]/module/[moduleName]/src/Model/AbstractModel.php
+[root]/module/[moduleName]/src/Form/[name]Form.php
 [root]/module/[moduleName]/src/Model/Rowset/[name].php
 [root]/module/[moduleName]/view/[name]/index.phtml
-[root]/module/[moduleName]/view/[name]/edit.phtml
 [root]/module/[moduleName]/view/[name]/add.phtml
+[root]/module/[moduleName]/view/[name]/delete.phtml
+[root]/module/[moduleName]/view/[name]/edit.phtml
 ```
 
-Sample output:
+Configuration in:
 ```php
-[WIP]
+config/generate.php
 ```
