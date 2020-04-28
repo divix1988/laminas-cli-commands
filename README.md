@@ -1,4 +1,4 @@
-# divix-laminas-cli-commands
+# laminas-cli-commands
 
 CLI Commands for Laminas projects
 
@@ -17,10 +17,14 @@ Add the following config into your `config/local.php` file:
 ```php
 'laminas-cli' => [
     'commands' => [
-        'mvc:controller' => \Divix\Laminas\Cli\ControllerCommand::class,
-        'mvc:rowset' => \Divix\Laminas\Cli\RowsetCommand::class,
-        'mvc:model' => \Divix\Laminas\Cli\ModelCommand::class,
-        'mvc:view' => \Divix\Laminas\Cli\ViewCommand::class,
+        'mvc:controller' => \Divix\Laminas\Cli\Command\ControllerCommand::class,
+        'mvc:rowset' => \Divix\Laminas\Cli\Command\RowsetCommand::class,
+        'mvc:model' => \Divix\Laminas\Cli\Command\ModelCommand::class,
+        'mvc:view' => \Divix\Laminas\Cli\Command\ViewCommand::class,
+        'mvc:crud' => \Divix\Laminas\Cli\Command\CrudCommand::class,
+        'mvc:crud_controller' => \Divix\Laminas\Cli\Command\CrudControllerCommand::class,
+        'mvc:crud_view' => \Divix\Laminas\Cli\Command\CrudViewCommand::class,
+        'mvc:crud_model' => \Divix\Laminas\Cli\Command\CrudModelCommand::class,
     ],
 ],
 ```
