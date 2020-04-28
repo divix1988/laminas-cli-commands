@@ -19,6 +19,7 @@ class AbstractCommand extends Command
     const MODULE_SRC = __DIR__.'/../../../../module/';
     const MODULE_CONTROLLER_SRC = '/src/Controller/';
     const MODULE_MODEL_SRC = '/src/Model/';
+    const MODULE_FORM_SRC = '/src/Form/';
     const MODULE_ROWSET_SRC = '/src/Model/Rowset/';
     
     protected function configure()
@@ -109,6 +110,14 @@ class AbstractCommand extends Command
         file_put_contents($dir.$fileName, $contents);
     }
     
+    protected function storeFormContents($fileName, $moduleName, $contents): void
+    {
+        $dir = self::MODULE_SRC.$moduleName.self::MODULE_FORM_SRC;
+
+        $this->createFoldersForDir($dir);        
+        file_put_contents($dir.$fileName, $contents);
+    }
+    
     protected function storeViewContents($fileName, $moduleName, $controllerName, $contents): void
     {
         $moduleName = strtolower($moduleName);
@@ -127,5 +136,19 @@ class AbstractCommand extends Command
             mkdir($dir);
         }
         file_put_contents($dir.$fileName, $contents);
+    }
+    
+    protected function createFoldersForDir($dir): void
+    {
+        $exploded = explode('/', $dir);
+        $currentFolder = '';
+        
+        foreach ($exploded as $folder) {
+            $currentFolder .= $folder.'/';
+                    
+            if (!file_exists($currentFolder)) {
+                mkdir($currentFolder);
+            }
+        }
     }
 }

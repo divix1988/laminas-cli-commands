@@ -45,10 +45,12 @@ class ViewCommand extends AbstractCommand
         $name = $input->getArgument('name');
         $contents = '<p>'.$moduleName.' - '.$name.'</p>';
         
-        $section1->writeln(PHP_EOL.$contents.PHP_EOL);
+        $section2->writeln(PHP_EOL.$contents.PHP_EOL);
         
         $this->storeViewContents($name.'.phtml', $moduleName, $controllerName, $contents);
-        $section2->writeln('Done creating new view.');
+        $section1->writeln('Done creating new view.');
+        
+        parent::postExecute($input, $output, $section1, $section2);
 
         return 0;
     }

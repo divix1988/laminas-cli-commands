@@ -58,15 +58,26 @@ class CrudViewCommand extends AbstractCommand
         $contents = str_replace("%name_plural_lower%", lcfirst($input->getOption('name_plural')), $contents);
         $columnsPhp = '';
         
-        if (!empty($input->getOption('columns'))) {
+        if (!empty($input->getOption('columns')) && $name != 'index') {
             foreach ($input->getOption('columns') as $column) {
                 $columnsPhp .= 
     '        echo $this->formRow($'.lcfirst($input->getOption('name_singular')).'Form->get(\''.$column.'\'));'.PHP_EOL;
             }
             $contents = str_replace("%form_elements%", $columnsPhp, $contents);
         }
+        $indexColumnsTh = '';
+        $indexColumnsTd = '';
         
-        
+        if (!empty($input->getOption('columns')) && $name == 'index') {
+            foreach ($input->getOption('columns') as $column) {
+                $indexColumnsTh .= 
+    '        <th>'.ucfirst($column).'</th>'.PHP_EOL;
+                $indexColumnsTd .= 
+    '            <td><?= $'.lcfirst($input->getOption('name_singular')).'->get'.ucfirst($column).'() ?></td>'.PHP_EOL;
+            }
+            $contents = str_replace("%table_columns_headings%", $indexColumnsTh, $contents);
+            $contents = str_replace("%table_columns%", $indexColumnsTd, $contents);
+        }
        
         $section1->writeln(PHP_EOL.$contents.PHP_EOL);
         

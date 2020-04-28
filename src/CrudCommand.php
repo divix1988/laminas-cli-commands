@@ -67,9 +67,16 @@ class CrudCommand extends AbstractCommand
         $section1->writeln('End creating new Controller.');
         
         $section1->writeln('Start creating new Model.');
-        //$this->generateModel($moduleName, $name, $output);
+        $this->generateModel($moduleName, $name, $output, $properties);
         $section1->writeln('End creating new Model.');
         
+        $section1->writeln('Start creating new Rowset.');
+        $this->generateRowset($moduleName, $name, $output, $properties);
+        $section1->writeln('End creating new Rowset.');
+        
+        $section1->writeln('Start creating new Form.');
+        $this->generateForm($moduleName, $name, $output, $properties);
+        $section1->writeln('End creating new Form.');
         
         $section1->writeln('Start creating Views for: index.phtml, create.phtml, update.phtml and delete.phtml.');
         $this->generateView(
@@ -104,6 +111,17 @@ class CrudCommand extends AbstractCommand
                 'columns' => $properties
             ]
         );
+        $this->generateView(
+            $moduleName, 
+            $name, 
+            $output,
+            'index',
+            [
+                'name_singular' => rtrim($name, 's'),
+                'name_plural' => $name,
+                'columns' => $properties
+            ]
+        );
         $section1->writeln('End creating new Views.');
         
         //$section2->writeln($model->generate());
@@ -118,7 +136,7 @@ class CrudCommand extends AbstractCommand
         $command = $this->getApplication()->find('mvc:crud_controller');
 
         $arguments = [
-            'command' => 'mvc:crud_controller2',
+            'command' => 'mvc:crud_controller',
             'name' => $name,
             '--actions' => ['create', 'update', 'delete'],
             '--module' => $moduleName,
@@ -129,15 +147,48 @@ class CrudCommand extends AbstractCommand
         $command->run($greetInput, $output);
     }
     
-    protected function generateModel($moduleName, $name, OutputInterface $output)
+    protected function generateModel($moduleName, $name, OutputInterface $output, array $properties)
     {
-        $command = $this->getApplication()->find('mvc:crud_model');
+        $command = $this->getApplication()->find('mvc:model');
 
         $arguments = [
-            'command' => 'mvc:crud_model',
-            'name' => $name,
-            '--actions' => ['create', 'update', 'delete'],
+            'command' => 'mvc:model',
+            'name' => $name.'Table',
+            //'--actions' => ['create', 'update', 'delete'],
             '--module' => $moduleName,
+            '--properties' => $properties,
+            '--print_mode' => true
+        ];
+
+        $greetInput = new ArrayInput($arguments);
+        $command->run($greetInput, $output);
+    }
+    
+    protected function generateRowset($moduleName, $name, OutputInterface $output, array $properties)
+    {
+        $command = $this->getApplication()->find('mvc:rowset');
+
+        $arguments = [
+            'command' => 'mvc:rowset',
+            'name' => rtrim($name, 's'),
+            '--module' => $moduleName,
+            '--properties' => $properties,
+            '--print_mode' => true
+        ];
+
+        $greetInput = new ArrayInput($arguments);
+        $command->run($greetInput, $output);
+    }
+    
+    protected function generateForm($moduleName, $name, OutputInterface $output, array $properties)
+    {
+        $command = $this->getApplication()->find('mvc:form');
+
+        $arguments = [
+            'command' => 'mvc:form',
+            'name' => $name,
+            '--module' => $moduleName,
+            '--properties' => $properties,
             '--print_mode' => true
         ];
 

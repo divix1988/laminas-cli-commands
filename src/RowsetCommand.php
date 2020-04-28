@@ -48,7 +48,17 @@ class RowsetCommand extends AbstractCommand
         $rowset->setName($name)
             ->setNamespaceName($moduleName . '\Model');
        
-        
+        $exchangeArrayBody = 
+        '       $this->id = (!empty($row[\'id\'])) ? $row[\'id\'] : null;'.PHP_EOL;
+        $getArrayCopyBody = '\'id\' => $this->getId(),'.PHP_EOL;
+/*    public function exchangeArray($row)
+    {
+        $this->id = (!empty($row['id'])) ? $row['id'] : null;
+        $this->title = (!empty($row['title'])) ? $row['title'] : null;
+        $this->thumb = (!empty($row['thumb'])) ? $row['thumb'] : null;
+    }
+ *
+ */
         if (!empty($properties)) {
             foreach ($properties as $property) {
                 $rowset->addProperty($property);
@@ -65,11 +75,34 @@ class RowsetCommand extends AbstractCommand
 '$this->'.$property.' = $value;
 return $this;'
                 );
+                
+                $exchangeArrayBody .= '$this->'.$property.' = (!empty($row[\''.$property.'\'])) ? $row[\''.$property.'\'] : null;'.PHP_EOL;
+                $getArrayCopyBody .= '\''.$property.'\' => $this->get'. ucfirst($property).'(),'.PHP_EOL;
             }
         }
-        $section2->writeln($rowset->generate());
+        
+        $rowset
+            ->addMethod(
+                'exchangeArray',
+                [['name' => 'row', 'type' => 'array']],
+                MethodGenerator::FLAG_PUBLIC,
+                $exchangeArrayBody
+            )
+            ->addMethod(
+                'getArrayCopy',
+                [],
+                MethodGenerator::FLAG_PUBLIC,
+'return[
+    '.$getArrayCopyBody.'
+];'
+            );
+        
+        
+        //$section2->writeln($rowset->generate());
         $this->storeRowsetContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$rowset->generate());
         $section2->writeln('Done creating new rowset.');
+        
+        parent::postExecute($input, $output, $section1, $section2);
 
         return 0;
     }

@@ -49,7 +49,7 @@ class ModelCommand extends AbstractCommand
         $generatedPatchFilters = '';
         
         $model = new ClassGenerator();
-        $model->setName($name.'Table')
+        $model->setName($name)
             ->setNamespaceName($moduleName . '\Model')
             ->setExtendedClass($moduleName. '\Model\AbstractTable')
             ->addProperty('resultsPerPage', 10, PropertyGenerator::FLAG_PROTECTED);
@@ -81,6 +81,14 @@ class ModelCommand extends AbstractCommand
                 }
             }
         }
+        
+        //add getById()
+        $model->addMethod(
+            'getById',
+            [['name' => 'id']],
+            MethodGenerator::FLAG_PUBLIC,
+                'return $this->getBy([\'id\' => $id]);'
+        );
         
         //add getBy()
         $model->addMethod(
@@ -130,7 +138,7 @@ $this->tableGateway->update($passedData, [\'id\' => $id]);'
         
         //add save()
         $model->addMethod(
-            'getById',
+            'save',
             [['name' => 'rowset', 'type' => 'Rowset\\'.$name]],
             MethodGenerator::FLAG_PUBLIC,
                 'return parent::saveRow($rowset);'
@@ -142,14 +150,16 @@ $this->tableGateway->update($passedData, [\'id\' => $id]);'
             [['name' => 'id']],
             MethodGenerator::FLAG_PUBLIC,
 'if (empty($id)) {
-    throw new \Exception(\'missing comics id to delete\');
+    throw new \Exception(\'missing '.$name.' id to delete\');
 }
 parent::deleteRow($id);'
         );
         
-        $section2->writeln($model->generate());
+        //$section2->writeln($model->generate());
         $this->storeModelContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$model->generate());
-        $section2->writeln('Done creating new model.');
+        $section1->writeln('Done creating new model.');
+        
+        parent::postExecute($input, $output, $section1, $section2);
 
         return 0;
     }
