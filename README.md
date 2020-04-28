@@ -20,6 +20,7 @@ Add the following config into your `config/local.php` file:
         'mvc:controller' => \Divix\Laminas\Cli\Command\ControllerCommand::class,
         'mvc:rowset' => \Divix\Laminas\Cli\Command\RowsetCommand::class,
         'mvc:model' => \Divix\Laminas\Cli\Command\ModelCommand::class,
+        'mvc:form' => \Divix\Laminas\Cli\Command\FormCommand::class,
         'mvc:view' => \Divix\Laminas\Cli\Command\ViewCommand::class,
         'mvc:crud' => \Divix\Laminas\Cli\Command\CrudCommand::class,
         'mvc:crud_controller' => \Divix\Laminas\Cli\Command\CrudControllerCommand::class,
@@ -150,6 +151,73 @@ class ModelNameTable extends AbstractTable
             throw new \Exception('missing comics id to delete');
         }
         parent::deleteRow($id);
+    }
+
+
+}
+```
+
+### Form
+Generate sample model with a list of properties:
+```bash
+"vendor/bin/laminas-cli.bat" mvc:form --properties=<property1> --properties=<property2> --module=<ModuleName> <name>
+```
+New file in: `[root]/module/[moduleName]/src/Form/[name]Form.php`
+
+Sample output:
+```php
+namespace ModuleName\Form;
+
+use \Laminas\Form\Element;
+
+class NewUserForm extends \Laminas\Form\Form implements \Laminas\InputFilter\InputFilterProviderInterface
+{
+
+     const ELEMENT_PROPERTY1 = 'property1';
+
+     const ELEMENT_PROPERTY2 = 'property2';
+
+    public function __construct($name, array $params)
+    {
+        parent::__construct($name, $params);
+        $this->setAttribute('class', 'styledForm');
+        
+        $this->add([
+            'name' => self::ELEMENT_PROPERTY1,
+            'type' => 'text',
+            'options' => [
+                'label' => 'property1'
+            ],
+            'attributes' => [
+                'required' => true
+            ]
+        ]);
+        
+        $this->add([
+            'name' => self::ELEMENT_PROPERTY2,
+            'type' => 'text',
+            'options' => [
+                'label' => 'property2'
+            ],
+            'attributes' => [
+                'required' => true
+            ]
+        ]);
+        
+        
+        $this->add([
+            'name' => 'submit',
+            'type' => 'submit',
+            'attributes' => [
+                'value' => 'Submit',
+                'class' => 'btn btn-primary'
+            ]
+        ]);
+    }
+
+    public function getInputFilterSpecification()
+    {
+        return [];
     }
 
 
