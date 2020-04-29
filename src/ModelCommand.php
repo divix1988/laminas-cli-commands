@@ -44,6 +44,8 @@ class ModelCommand extends AbstractCommand
         $this->createAbstractModel($moduleName);
         
         $name = ucfirst($input->getArgument('name'));
+        $exploded = explode('Table', $name);
+        $rowsetName = rtrim($exploded[0], 's');
         $properties = $input->getOption('properties');
         $generatedGetByFilters = '';
         $generatedPatchFilters = '';
@@ -139,7 +141,7 @@ $this->tableGateway->update($passedData, [\'id\' => $id]);'
         //add save()
         $model->addMethod(
             'save',
-            [['name' => 'rowset', 'type' => 'Rowset\\'.$name]],
+            [['name' => 'rowset', 'type' => '\ModuleName\Model\Rowset\\'.$rowsetName]],
             MethodGenerator::FLAG_PUBLIC,
                 'return parent::saveRow($rowset);'
         );

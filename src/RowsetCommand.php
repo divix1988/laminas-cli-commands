@@ -46,7 +46,9 @@ class RowsetCommand extends AbstractCommand
         
         $rowset = new ClassGenerator();
         $rowset->setName($name)
-            ->setNamespaceName($moduleName . '\Model\Rowset');
+            ->setNamespaceName($moduleName . '\Model\Rowset')
+            ->setExtendedClass($moduleName . '\Model\Rowset\AbstractModel')
+            ->setImplementedInterfaces(['\Laminas\InputFilter\InputFilterAwareInterface']);
        
         $exchangeArrayBody = 
         '       $this->id = (!empty($row[\'id\'])) ? $row[\'id\'] : null;'.PHP_EOL;
@@ -92,9 +94,21 @@ return $this;'
 'return[
     '.$getArrayCopyBody.'
 ];'
+            )
+            ->addMethod(
+                'getInputFilter',
+                [],
+                MethodGenerator::FLAG_PUBLIC,
+'return new \Laminas\InputFilter\InputFilter();'
+            )
+            ->addMethod(
+                'setInputFilter',
+                [['name' => 'inputFilter', 'type' => '\Laminas\InputFilter\InputFilterInterface']],
+                MethodGenerator::FLAG_PUBLIC,
+'throw new DomainException(\'This class does not support adding of extra input filters\');'
             );
         
-        
+        $this->createAbstractRowset($moduleName);
         //$section2->writeln($rowset->generate());
         $this->storeRowsetContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$rowset->generate());
         $section2->writeln('Done creating new rowset.');
@@ -102,5 +116,14 @@ return $this;'
         parent::postExecute($input, $output, $section1, $section2);
 
         return 0;
+    }
+    
+    protected function createAbstractRowset($moduleName)
+    {
+        $abstractContents = file_get_contents(__DIR__.'/Templates/AbstractModel.php');
+        
+        $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
+        
+        $this->storeRowsetContents('AbstractModel.php', $moduleName, $abstractContents);
     }
 }

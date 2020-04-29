@@ -138,7 +138,7 @@ class CrudCommand extends AbstractCommand
         $arguments = [
             'command' => 'mvc:crud_controller',
             'name' => $name,
-            '--actions' => ['create', 'update', 'delete'],
+            '--actions' => ['add', 'edit', 'delete'],
             '--module' => $moduleName,
             '--print_mode' => true
         ];

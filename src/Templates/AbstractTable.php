@@ -3,7 +3,7 @@
 namespace %module_name%\Model;
 
 use Laminas\Db\TableGateway\TableGatewayInterface;
-use Application\Model\Rowset\AbstractModel;
+use %module_name%\Model\Rowset\AbstractModel;
 use Laminas\Paginator\Adapter\DbSelect;
 use Laminas\Paginator\Paginator;
 use Laminas\Cache\StorageFactory;
@@ -32,7 +32,7 @@ class AbstractTable
                 ],
                 'plugins' => ['serializer'],
             ]);
-            Paginator::setCache(self::$paginatorCache);
+            //Paginator::setCache(self::$paginatorCache); //uncomment here if you want cache enabled
         }
     }
     

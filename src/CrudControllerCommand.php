@@ -39,11 +39,15 @@ class CrudControllerCommand extends ControllerCommand
         $moduleName = $this->getModuleName($input, $output, 'controller');
         
         $name = lcfirst($input->getArgument('name'));
+        $nameSingularUpper = ucfirst(rtrim($name, 's'));
+        $nameSingularLower = lcfirst(rtrim($name, 's'));
         $controllerName = ucfirst($input->getArgument('name')) . 'Controller';
         $actions = $input->getOption('actions');
         
         $controller = $this->getControllerObject($controllerName, $moduleName, $actions);
         $controller->addUse($moduleName.'\Model\\'.ucfirst($name).'Table');
+        $controller->addUse($moduleName.'\Model\\Rowset\\'.$nameSingularUpper);
+        $controller->addUse($moduleName.'\Form\\'.$nameSingularUpper.'Form');
         $controller->addProperty($name.'Table', null, PropertyGenerator::FLAG_PROTECTED);
         
         $controller->addMethod(
@@ -63,22 +67,22 @@ $view->setVariable(\''.rtrim($name, 's').'Rows\', $rows);
 return $view;'
             );
         
-        $controller->getMethod('createAction')
+        $controller->getMethod('addAction')
             ->setBody(
 '$request = $this->getRequest();
-$'.$name.'Form = new '.$name.'Form();
+$'.$name.'Form = new '.$nameSingularUpper.'Form();
 $'.$name.'Form->get(\'submit\')->setValue(\'Add\');
 
 if (!$request->isPost()) {
-    return [\''.$name.'Form\' => $'.$name.'Form];
+    return [\''.$nameSingularLower.'Form\' => $'.$name.'Form];
 }
-$'.$name.'Model = new '.$name.'();
+$'.$name.'Model = new '.$nameSingularUpper.'();
 $'.$name.'Form->setInputFilter($'.$name.'Model->getInputFilter());
 $'.$name.'Form->setData($request->getPost());
 
 if (!$'.$name.'Form->isValid()) {
     print_r($'.$name.'Form->getMessages());
-    return [\''.$name.'Form\' => $'.$name.'Form];
+    return [\''.$nameSingularLower.'Form\' => $'.$name.'Form];
 }
 $'.$name.'Model->exchangeArray($'.$name.'Form->getData());
 $this->'.$name.'Table->save($'.$name.'Model);
@@ -87,48 +91,48 @@ $this->redirect()->toRoute(\''.$name.'\');'
             );
         
         
-        $controller->getMethod('updateAction')
+        $controller->getMethod('editAction')
             ->setBody(
 '$view = new ViewModel();
-$userId = (int) $this->params()->fromRoute(\'id\');
-$view->setVariable(\'userId\', $userId);
-if ($userId == 0) {
-    return $this->redirect()->toRoute(\'users\', [\'action\' => \'add\']);
+$'.$name.'Id = (int) $this->params()->fromRoute(\'id\');
+$view->setVariable(\''.$nameSingularLower.'Id\', $'.$name.'Id);
+if ($'.$name.'Id == 0) {
+    return $this->redirect()->toRoute(\''.$name.'\', [\'action\' => \'add\']);
 }
 // get user data; if it doesn’t exists, then redirect back to the index
 try {
-    $userRow = $this->usersTable->getById($userId);
+    $'.$name.'Row = $this->'.$name.'Table->getById($'.$name.'Id);
 } catch (\Exception $e) {
-    return $this->redirect()->toRoute(\'users\', [\'action\' => \'index\']);
+    return $this->redirect()->toRoute(\''.$name.'\', [\'action\' => \'index\']);
 }
-$userForm = new UserForm();
-$userForm->bind($userRow);
+$'.$name.'Form = new '.$nameSingularUpper.'Form();
+$'.$name.'Form->bind($'.$name.'Row);
 
-$userForm->get(\'submit\')->setAttribute(\'value\', \'Save\');
+$'.$name.'Form->get(\'submit\')->setAttribute(\'value\', \'Save\');
 $request = $this->getRequest();
-$view->setVariable(\'userForm\', $userForm);
+$view->setVariable(\''.$nameSingularLower.'Form\', $'.$name.'Form);
 
 if (!$request->isPost()) {
     return $view;
 }
-$userForm->setInputFilter($userRow->getInputFilter());
-$userForm->setData($request->getPost());
+$'.$name.'Form->setInputFilter($'.$name.'Row->getInputFilter());
+$'.$name.'Form->setData($request->getPost());
 
-if (!$userForm->isValid()) {
+if (!$'.$name.'Form->isValid()) {
     return $view;
 }
-$this->usersTable->save($userRow);
+$this->'.$name.'able->save($'.$name.'Row);
 // data saved, redirect to the users list page
-return $this->redirect()->toRoute(\'users\', [\'action\' => \'index\']);'
+return $this->redirect()->toRoute(\''.$name.'\', [\'action\' => \'index\']);'
           );
         
         
         $controller->getMethod('deleteAction')
             ->setBody(
-'$userId = (int) $this->params()->fromRoute(\'id\');
+'$'.$name.'Id = (int) $this->params()->fromRoute(\'id\');
 
-if (empty($userId)) {
-    return $this->redirect()->toRoute(\'users\');
+if (empty($'.$name.'Id)) {
+    return $this->redirect()->toRoute(\''.$name.'\');
 }
 $request = $this->getRequest();
 
@@ -136,15 +140,15 @@ if ($request->isPost()) {
     $del = $request->getPost(\'del\', \'Cancel\');
 
     if ($del == \'Delete\') {
-        $userId = (int) $request->getPost(\'id\');
-        $this->usersTable->delete($userId);
+        $'.$name.'Id = (int) $request->getPost(\'id\');
+        $this->usersTable->delete($'.$name.'Id);
     }
     // redirect to the users list
-    return $this->redirect()->toRoute(\'users\');
+    return $this->redirect()->toRoute(\''.$name.'\');
 }
 return [
-    \'id\' => $userId,
-    \'user\' => $this->usersTable->getById($userId),
+    \'id\' => $'.$name.'Id,
+    \''.$name.'\' => $this->'.$name.'Table->getById($'.$name.'Id),
 ];'
           );
         

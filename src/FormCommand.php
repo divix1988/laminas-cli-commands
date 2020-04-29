@@ -74,8 +74,8 @@ class FormCommand extends AbstractCommand
             ->addMethod(
                 '__construct',
                 [
-                    ['name' => 'name', 'default' => rtrim($input->getArgument('name'), 's').'_form'],
-                    ['name' => 'params', 'type' => 'array']
+                    ['name' => 'name', 'defaultvalue' => rtrim($input->getArgument('name'), 's').'_form'],
+                    ['name' => 'params', 'type' => 'array', 'defaultvalue' => []]
                 ],
                 MethodGenerator::FLAG_PUBLIC,
 'parent::__construct($name, $params);
