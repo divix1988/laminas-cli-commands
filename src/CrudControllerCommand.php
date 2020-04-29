@@ -47,7 +47,7 @@ class CrudControllerCommand extends ControllerCommand
         $controller->addProperty($name.'Table', null, PropertyGenerator::FLAG_PROTECTED);
         
         $controller->addMethod(
-            '__constructor',
+            '__construct',
             [['type' => $moduleName.'\Model\\'.ucfirst($name).'Table', 'name' => $name.'Table']],
             MethodGenerator::FLAG_PUBLIC,
 '$this->'.$name.'Table = $'.$name.'Table;'        
@@ -58,7 +58,7 @@ class CrudControllerCommand extends ControllerCommand
 '$view = new ViewModel();
 $rows = $this->'.$name.'Table->getBy([\'page\' => $this->params()->fromRoute(\'page\')]);
 
-$view->setVariable(\''.$name.'\', $rows);
+$view->setVariable(\''.rtrim($name, 's').'Rows\', $rows);
 
 return $view;'
             );

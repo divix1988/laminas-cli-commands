@@ -166,6 +166,10 @@ parent::deleteRow($id);'
     
     protected function createAbstractModel($moduleName)
     {
-        $this->storeModelContents('AbstractTable.php', $moduleName, null, 'AbstractTable.php');
+        $abstractContents = file_get_contents(__DIR__.'/Templates/AbstractTable.php');
+        
+        $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
+        
+        $this->storeModelContents('AbstractTable.php', $moduleName, $abstractContents);
     }
 }

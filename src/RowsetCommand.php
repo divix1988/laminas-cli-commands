@@ -46,19 +46,16 @@ class RowsetCommand extends AbstractCommand
         
         $rowset = new ClassGenerator();
         $rowset->setName($name)
-            ->setNamespaceName($moduleName . '\Model');
+            ->setNamespaceName($moduleName . '\Model\Rowset');
        
         $exchangeArrayBody = 
         '       $this->id = (!empty($row[\'id\'])) ? $row[\'id\'] : null;'.PHP_EOL;
         $getArrayCopyBody = '\'id\' => $this->getId(),'.PHP_EOL;
-/*    public function exchangeArray($row)
-    {
-        $this->id = (!empty($row['id'])) ? $row['id'] : null;
-        $this->title = (!empty($row['title'])) ? $row['title'] : null;
-        $this->thumb = (!empty($row['thumb'])) ? $row['thumb'] : null;
-    }
- *
- */
+        
+        if (!array_search('id', $properties)) {
+            $properties[] = 'id';
+        }
+
         if (!empty($properties)) {
             foreach ($properties as $property) {
                 $rowset->addProperty($property);

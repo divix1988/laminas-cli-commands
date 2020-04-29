@@ -61,8 +61,9 @@ class ControllerCommand extends AbstractCommand
         $methodActions = ['index'];
         $controller = new ClassGenerator();
         $controller->setName($name)
-            ->setNamespaceName($moduleName . '\Controller\\' . $name)
-            ->setExtendedClass('Laminas\Mvc\Controller\AbstractActionController');
+            ->setNamespaceName($moduleName . '\Controller')
+            ->setExtendedClass('Laminas\Mvc\Controller\AbstractActionController')
+            ->addUse('\Laminas\View\Model\ViewModel');
         
         if (!empty($actions)) {
             $methodActions = array_merge($methodActions, $actions);

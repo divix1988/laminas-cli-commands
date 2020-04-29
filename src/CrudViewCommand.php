@@ -56,6 +56,7 @@ class CrudViewCommand extends AbstractCommand
         $contents = str_replace("%name_singular_lower%", lcfirst($input->getOption('name_singular')), $contents);
         $contents = str_replace("%name_singular_upper%", ucfirst($input->getOption('name_singular')), $contents);
         $contents = str_replace("%name_plural_lower%", lcfirst($input->getOption('name_plural')), $contents);
+        $contents = str_replace("%name_plural_upper%", ucfirst($input->getOption('name_plural')), $contents);
         $columnsPhp = '';
         
         if (!empty($input->getOption('columns')) && $name != 'index') {

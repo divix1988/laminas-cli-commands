@@ -63,11 +63,7 @@ class AbstractCommand extends Command
     {
         $dir = self::MODULE_SRC.$moduleName.self::MODULE_CONTROLLER_SRC;
         
-        if (!file_exists($dir)) {
-            mkdir(self::MODULE_SRC.$moduleName);
-            mkdir(self::MODULE_SRC.$moduleName.'/src/');
-            mkdir(self::MODULE_SRC.$moduleName.'/src/Controller');
-        }
+        $this->createFoldersForDir($dir);
         file_put_contents($dir.$fileName, $contents);
     }
     
@@ -75,15 +71,7 @@ class AbstractCommand extends Command
     {
         $dir = self::MODULE_SRC.$moduleName.self::MODULE_MODEL_SRC;
 
-        if (!file_exists(self::MODULE_SRC.$moduleName)) {
-            mkdir(self::MODULE_SRC.$moduleName);
-        }
-        if (!file_exists(self::MODULE_SRC.$moduleName.'/src/')) {
-            mkdir(self::MODULE_SRC.$moduleName.'/src/');
-        }
-        if (!file_exists($dir)) {
-            mkdir(self::MODULE_SRC.$moduleName.self::MODULE_MODEL_SRC);
-        }
+        $this->createFoldersForDir($dir);
         
         if (empty($contents) && isset($templateFile)) {
             $contents = file_get_contents(__DIR__.'/Templates/'.$templateFile);
@@ -95,18 +83,7 @@ class AbstractCommand extends Command
     {
         $dir = self::MODULE_SRC.$moduleName.self::MODULE_ROWSET_SRC;
         
-        if (!file_exists(self::MODULE_SRC.$moduleName)) {
-            mkdir(self::MODULE_SRC.$moduleName);
-        }
-        if (!file_exists(self::MODULE_SRC.$moduleName.'/src/')) {
-            mkdir(self::MODULE_SRC.$moduleName.'/src/');
-        }
-        if (!file_exists(self::MODULE_SRC.$moduleName.'/src/Model/')) {
-            mkdir(self::MODULE_SRC.$moduleName.'/src/Model/');
-        }
-        if (!file_exists($dir)) {
-            mkdir(self::MODULE_SRC.$moduleName.self::MODULE_ROWSET_SRC);
-        }
+        $this->createFoldersForDir($dir);
         file_put_contents($dir.$fileName, $contents);
     }
     
@@ -114,7 +91,7 @@ class AbstractCommand extends Command
     {
         $dir = self::MODULE_SRC.$moduleName.self::MODULE_FORM_SRC;
 
-        $this->createFoldersForDir($dir);        
+        $this->createFoldersForDir($dir); 
         file_put_contents($dir.$fileName, $contents);
     }
     
@@ -123,18 +100,7 @@ class AbstractCommand extends Command
         $moduleName = strtolower($moduleName);
         $dir = self::MODULE_SRC.$moduleName.'/view/'.$controllerName.'/';
         
-        if (!file_exists(self::MODULE_SRC)) {
-            mkdir(self::MODULE_SRC);
-        }
-        if (!file_exists(self::MODULE_SRC.$moduleName.'/view/')) {
-            mkdir(self::MODULE_SRC.$moduleName.'/view/');
-        }
-        if (!file_exists(self::MODULE_SRC.$moduleName.'/view/'.$controllerName.'/')) {
-            mkdir(self::MODULE_SRC.$moduleName.'/view/'.$controllerName.'/');
-        }
-        if (!file_exists($dir)) {
-            mkdir($dir);
-        }
+        $this->createFoldersForDir($dir);
         file_put_contents($dir.$fileName, $contents);
     }
     

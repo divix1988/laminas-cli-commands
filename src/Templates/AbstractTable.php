@@ -1,6 +1,6 @@
 <?php
 
-namespace Application\Model;
+namespace %module_name%\Model;
 
 use Laminas\Db\TableGateway\TableGatewayInterface;
 use Application\Model\Rowset\AbstractModel;
