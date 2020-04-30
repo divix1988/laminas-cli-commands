@@ -280,25 +280,104 @@ Sample output:
 <p>ModuleName - ViewName</p>
 ```
 
-### CRUD [WIP]
+### CRUD
 Generate a full working example with Form, Rowset, Model, View and Controller with given name:
 ```bash
-"vendor/bin/laminas-cli.bat" mvc:crud --properties=<property1> --properties=<property2> --module=ModuleName <name>
+"vendor/bin/laminas.bat" mvc:crud --properties=<property1> --properties=<property2> --module=ModuleName <name>
 ```
 New files in: 
 ```
 [root]/module/[moduleName]/src/Controller/[name]Controller.php
 [root]/module/[moduleName]/src/Model/[name]Model.php
-[root]/module/[moduleName]/src/Model/AbstractModel.php
+[root]/module/[moduleName]/src/Model/AbstractTable.php
 [root]/module/[moduleName]/src/Form/[name]Form.php
 [root]/module/[moduleName]/src/Model/Rowset/[name].php
+[root]/module/[moduleName]/src/Model/Rowset/AbstractModel.php
 [root]/module/[moduleName]/view/[name]/index.phtml
+[root]/module/[moduleName]/view/[name]/pagination.phtml
 [root]/module/[moduleName]/view/[name]/add.phtml
 [root]/module/[moduleName]/view/[name]/delete.phtml
 [root]/module/[moduleName]/view/[name]/edit.phtml
 ```
 
 Configuration in:
+`config/generate.php`
+
 ```php
-config/generate.php
+namespace ModuleName;
+
+use Laminas\Router\Http\Segment;
+use Laminas\Db\ResultSet\ResultSet;
+use Laminas\Db\TableGateway\TableGateway;
+use ModuleName\Model\Rowset;
+use ModuleName\Model;
+use ModuleName\Controller;
+
+return [
+    'router' => [
+        'routes' => [
+            'newUsers' => [
+                'type' => Segment::class,
+                'options' => [
+                    'route' => '/newusers[/:action[/:id]]',
+                    'defaults' => [
+                        'controller' => Controller\NewUsersController::class,
+                        'action' => 'index',
+                    ],
+                ],
+                'may_terminate' => true,
+                'child_routes' => [
+                    'paginator' => [
+                        'type' => 'segment',
+                        'options' => [
+                            'route' => '/[page/:page]',
+                            'defaults' => [
+                                'page' => 1
+                            ]
+                        ]
+                    ],
+                ]
+            ]
+        ]
+    ],
+    
+    'controllers' => [
+        'factories' => [
+            Controller\NewUsersController::class => function($sm) {
+                $postService = $sm->get(Model\NewUsersTable::class);
+
+                return new Controller\NewUsersController($postService);
+            },
+        ]
+    ],
+                    
+    'service_manager' => [
+        'factories' => [
+            'NewUsersTableGateway' => function ($sm) {
+                $dbAdapter = $sm->get('Laminas\Db\Adapter\Adapter');
+                $config = $sm->get('Config');
+                $baseUrl = $config['view_manager']['base_url'];
+                $resultSetPrototype = new ResultSet();
+                $identity = new Rowset\NewUser($baseUrl);
+                $resultSetPrototype->setArrayObjectPrototype($identity);
+                return new TableGateway('newusers', $dbAdapter, null, $resultSetPrototype);
+            },
+            Model\NewUsersTable::class => function($sm) {
+                $tableGateway = $sm->get('NewUsersTableGateway');
+                $table = new Model\NewUsersTable($tableGateway);
+                return $table;
+            },
+        ]
+    ],
+                    
+    'view_manager' => [
+        'template_map' => [
+            'module-name/new-users/index' => __DIR__ . '/../view/NewUsers/index.phtml',
+            'module-name/new-users/edit' => __DIR__ . '/../view/NewUsers/edit.phtml',
+            'module-name/new-users/add' => __DIR__ . '/../view/NewUsers/add.phtml',
+            'module-name/new-users/pagination' => __DIR__ . '/../view/NewUsers/pagination.phtml',
+        ],
+    ]
+];
+
 ```
