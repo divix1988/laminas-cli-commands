@@ -20,6 +20,7 @@ class AbstractCommand extends Command
     const MODULE_CONTROLLER_SRC = '/src/Controller/';
     const MODULE_MODEL_SRC = '/src/Model/';
     const MODULE_FORM_SRC = '/src/Form/';
+    const MODULE_CONFIG_SRC = '/config/';
     const MODULE_ROWSET_SRC = '/src/Model/Rowset/';
     
     protected function configure()
@@ -95,6 +96,14 @@ class AbstractCommand extends Command
         file_put_contents($dir.$fileName, $contents);
     }
     
+    protected function storeConfigContents($fileName, $moduleName, $contents): void
+    {
+        $dir = self::MODULE_SRC.$moduleName.self::MODULE_CONFIG_SRC;
+
+        $this->createFoldersForDir($dir); 
+        file_put_contents($dir.$fileName, $contents);
+    }
+    
     protected function storeViewContents($fileName, $moduleName, $controllerName, $contents): void
     {
         $moduleName = strtolower($moduleName);
@@ -116,5 +125,14 @@ class AbstractCommand extends Command
                 mkdir($currentFolder);
             }
         }
+    }
+    
+    protected function convertCamelCaseToDashes($input) {
+        preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $input, $matches);
+        $ret = $matches[0];
+        foreach ($ret as &$match) {
+          $match = $match == strtoupper($match) ? strtolower($match) : lcfirst($match);
+        }
+        return implode('-', $ret);
     }
 }

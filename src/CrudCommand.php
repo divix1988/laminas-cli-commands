@@ -124,6 +124,10 @@ class CrudCommand extends AbstractCommand
         );
         $section1->writeln('End creating new Views.');
         
+        $section1->writeln('Start creating new Config.');
+        $this->generateConfig($moduleName, $name, $output, 'generated');
+        $section1->writeln('End creating new Config.');
+        
         //$section2->writeln($model->generate());
         //$this->storeModelContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$model->generate());
         $section1->writeln('Done creating new CRUD.');
@@ -211,6 +215,23 @@ class CrudCommand extends AbstractCommand
         foreach ($options as $key => $value) {
             $arguments['--'.$key] = $value;
         }
+
+        $greetInput = new ArrayInput($arguments);
+        $command->run($greetInput, $output);
+    }
+    
+    protected function generateConfig($moduleName, $name, OutputInterface $output, $configName)
+    {
+        $command = $this->getApplication()->find('mvc:crud_config');
+
+        $arguments = [
+            'command' => 'mvc:crud_config',
+            'name' => $configName,
+            '--module' => $moduleName,
+            '--name_singular' => rtrim($name, 's'),
+            '--name_plural' => $name,
+            '--print_mode' => true
+        ];
 
         $greetInput = new ArrayInput($arguments);
         $command->run($greetInput, $output);
