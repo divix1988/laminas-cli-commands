@@ -21,4 +21,11 @@
         </tr>
         <?php endforeach; ?>
     </table>
+    
+    <?= $this->paginationControl(
+        $%name_singular_lower%Rows,
+        'Sliding',
+        'pagination',
+        ['route' => '%name_plural_lower%/paginator']
+    ) ?>
 </div>

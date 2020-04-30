@@ -17,7 +17,7 @@ use Laminas\Code\Generator\MethodGenerator;
 /**
  * Usage:
  * 
- * "vendor/bin/laminas-cli.bat" mvc:crud --properties=<property1> --properties=<property2> --module=<moduleName> <name>
+ * "vendor/bin/laminas.bat" mvc:crud --properties=<property1> --properties=<property2> --module=<moduleName> <name>
  */
 class CrudCommand extends AbstractCommand
 {
@@ -196,7 +196,7 @@ class CrudCommand extends AbstractCommand
         $command->run($greetInput, $output);
     }
     
-    protected function generateView($moduleName, $name, OutputInterface $output, $viewType, array $options)
+    protected function generateView($moduleName, $name, OutputInterface $output, $viewType, array $options = [])
     {
         $command = $this->getApplication()->find('mvc:crud_view');
 

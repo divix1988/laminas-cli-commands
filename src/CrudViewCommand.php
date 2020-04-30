@@ -79,6 +79,10 @@ class CrudViewCommand extends AbstractCommand
             $contents = str_replace("%table_columns_headings%", $indexColumnsTh, $contents);
             $contents = str_replace("%table_columns%", $indexColumnsTd, $contents);
         }
+        
+        if ($name == 'index') {
+            $this->createPaginationView($moduleName, $controllerName);
+        }
        
         $section1->writeln(PHP_EOL.$contents.PHP_EOL);
         
@@ -88,5 +92,12 @@ class CrudViewCommand extends AbstractCommand
         parent::postExecute($input, $output, $section1, $section2);
 
         return 0;
+    }
+    
+    protected function createPaginationView($moduleName, $controllerName)
+    {
+        $pagination = file_get_contents(__DIR__.'/Templates/Crud/View/pagination.phtml');
+        
+        $this->storeViewContents('pagination.phtml', $moduleName, $controllerName, $pagination);
     }
 }

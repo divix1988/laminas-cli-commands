@@ -1,0 +1,32 @@
+<?php if ($this->pageCount): ?>
+    <div class="paginationControl">
+    <!-- Previous strona -->
+    <?php if (isset($this->previous)): ?>
+      <a href="<?= $this->url($this->route, ['id' => 'list', 'page' => $this->previous]); ?>">
+        &lt; Previous
+      </a> |
+    <?php else: ?>
+      <span class="disabled">&lt; Previous</span> |
+    <?php endif; ?>
+
+    <!-- Numery stron -->
+    <?php foreach ($this->pagesInRange as $page): ?>
+      <?php if ($page != $this->current): ?>
+        <a href="<?= $this->url($this->route, ['id' => 'list', 'page' => $page]); ?>">
+            <?= $page; ?>
+        </a> |
+      <?php else: ?>
+        <?= $page; ?> |
+      <?php endif; ?>
+    <?php endforeach; ?>
+
+    <!-- Next strona -->
+    <?php if (isset($this->next)): ?>
+      <a href="<?= $this->url($this->route, ['id' => 'list', 'page' => $this->next]); ?>">
+        Next &gt;
+      </a>
+    <?php else: ?>
+      <span class="disabled">Next &gt;</span>
+    <?php endif; ?>
+    </div>
+<?php endif; ?>
