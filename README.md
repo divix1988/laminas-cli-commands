@@ -281,7 +281,7 @@ Sample output:
 <p>ModuleName - ViewName</p>
 ```
 
-### CRUD
+## CRUD
 Generate a full working example with Form, Rowset, Model, View and Controller with given name:
 ```bash
 "vendor/bin/laminas.bat" mvc:crud --properties=<property1> --properties=<property2> --module=ModuleName <name>
