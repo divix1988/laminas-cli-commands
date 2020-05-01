@@ -125,7 +125,7 @@ class CrudCommand extends AbstractCommand
         $section1->writeln('End creating new Views.');
         
         $section1->writeln('Start creating new Config.');
-        $this->generateConfig($moduleName, $name, $output, 'generated');
+        $this->generateConfig($moduleName, $name, $output, 'generated.crud');
         $section1->writeln('End creating new Config.');
         
         //$section2->writeln($model->generate());

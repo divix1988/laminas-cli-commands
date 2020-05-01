@@ -61,6 +61,7 @@ class CrudConfigCommand extends AbstractCommand
         $section2->writeln(PHP_EOL.$contents.PHP_EOL);
         
         $this->storeConfigContents($name.'.php', $moduleName, $contents);
+        $this->injectNewConfigToModuleFile($moduleName, $name);
         $section1->writeln('Done creating new config.');
         
         parent::postExecute($input, $output, $section1, $section2);

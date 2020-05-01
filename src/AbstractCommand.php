@@ -20,6 +20,7 @@ class AbstractCommand extends Command
     const MODULE_CONTROLLER_SRC = '/src/Controller/';
     const MODULE_MODEL_SRC = '/src/Model/';
     const MODULE_FORM_SRC = '/src/Form/';
+    const MODULE_FILE_SRC = '/src/Module.php';
     const MODULE_CONFIG_SRC = '/config/';
     const MODULE_ROWSET_SRC = '/src/Model/Rowset/';
     
@@ -134,5 +135,20 @@ class AbstractCommand extends Command
           $match = $match == strtoupper($match) ? strtolower($match) : lcfirst($match);
         }
         return implode('-', $ret);
+    }
+    
+    protected function injectNewConfigToModuleFile($moduleName, $name)
+    {
+        $filePath = self::MODULE_SRC.$moduleName.self::MODULE_FILE_SRC;
+        
+        $contents = file_get_contents($filePath);
+        
+        $contents = str_replace(
+            'return include __DIR__ . \'/../config/module.config.php\';',
+            'return array_merge(include __DIR__ . \'/../config/module.config.php\', include __DIR__ . \'/../config/'.$name.'.php\');', 
+            $contents
+        );
+        
+        file_put_contents($filePath, $contents);
     }
 }
