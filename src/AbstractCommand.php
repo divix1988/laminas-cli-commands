@@ -24,23 +24,48 @@ class AbstractCommand extends Command
     const MODULE_CONFIG_SRC = '/config/';
     const MODULE_ROWSET_SRC = '/src/Model/Rowset/';
     
+    protected $input;
+    protected $registerOtherCommands = false;
+    
+    public function __construct($setRegisterOtherCommands = false)
+    {
+        $this->registerOtherCommands = $setRegisterOtherCommands;
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this->addOption('module', null, InputOption::VALUE_OPTIONAL, 'The module name of the component.');
         $this->addOption('print_mode', null, InputOption::VALUE_OPTIONAL, 'Print only the generated file and don\'t store it.');
+        $this->addOption('json', null, InputOption::VALUE_OPTIONAL, 'Print only output in josn and do not store the file.');
     }
     
-    protected function postExecute(InputInterface $input, OutputInterface $output, ConsoleSectionOutput &$section1, &$section2)
+    protected function postExecute(InputInterface $input, OutputInterface $output, OutputInterface &$section1, &$section2)
     {
         if ($this->getPrintMode($input)) {
             $section1->clear();
-            $section2->clear();
+            //$section2->clear();
         }
+    }
+    
+    public function setRegisterOtherCommands($value) {
+        exit('calling set with: '.$value);
+        $this->registerOtherCommands = $value;
     }
     
     protected function getPrintMode($input)
     {
         $value = $input->getOption('print_mode');
+        
+        return (!empty($value) && $value == true);
+    }
+    
+    protected function isJsonMode($input = null)
+    {
+        if (empty($input)) {
+            $input = $this->input;
+        }
+        $value = $input->getOption('json');
         
         return (!empty($value) && $value == true);
     }
@@ -63,6 +88,9 @@ class AbstractCommand extends Command
     
     protected function storeControllerContents($fileName, $moduleName, $contents): void
     {
+        if ($this->isJsonMode()) {
+            return;
+        }
         $dir = self::MODULE_SRC.$moduleName.self::MODULE_CONTROLLER_SRC;
         
         $this->createFoldersForDir($dir);
@@ -71,6 +99,9 @@ class AbstractCommand extends Command
     
     protected function storeModelContents($fileName, $moduleName, $contents = null, $templateFile = null): void
     {
+        if ($this->isJsonMode()) {
+            return;
+        }
         $dir = self::MODULE_SRC.$moduleName.self::MODULE_MODEL_SRC;
 
         $this->createFoldersForDir($dir);
@@ -83,6 +114,9 @@ class AbstractCommand extends Command
     
     protected function storeRowsetContents($fileName, $moduleName, $contents): void
     {
+        if ($this->isJsonMode()) {
+            return;
+        }
         $dir = self::MODULE_SRC.$moduleName.self::MODULE_ROWSET_SRC;
         
         $this->createFoldersForDir($dir);
@@ -91,6 +125,9 @@ class AbstractCommand extends Command
     
     protected function storeFormContents($fileName, $moduleName, $contents): void
     {
+        if ($this->isJsonMode()) {
+            return;
+        }
         $dir = self::MODULE_SRC.$moduleName.self::MODULE_FORM_SRC;
 
         $this->createFoldersForDir($dir); 
@@ -99,6 +136,9 @@ class AbstractCommand extends Command
     
     protected function storeConfigContents($fileName, $moduleName, $contents): void
     {
+        if ($this->isJsonMode()) {
+            return;
+        }
         $dir = self::MODULE_SRC.$moduleName.self::MODULE_CONFIG_SRC;
 
         $this->createFoldersForDir($dir); 
@@ -107,6 +147,9 @@ class AbstractCommand extends Command
     
     protected function storeViewContents($fileName, $moduleName, $controllerName, $contents): void
     {
+        if ($this->isJsonMode()) {
+            return;
+        }
         $moduleName = strtolower($moduleName);
         $dir = self::MODULE_SRC.$moduleName.'/view/'.$controllerName.'/';
         
@@ -116,6 +159,9 @@ class AbstractCommand extends Command
     
     protected function createFoldersForDir($dir): void
     {
+        if ($this->isJsonMode()) {
+            return;
+        }
         $exploded = explode('/', $dir);
         $currentFolder = '';
         
@@ -139,6 +185,9 @@ class AbstractCommand extends Command
     
     protected function injectNewConfigToModuleFile($moduleName, $name)
     {
+        if ($this->isJsonMode()) {
+            return 'return array_merge(include __DIR__ . \'/../config/module.config.php\', include __DIR__ . \'/../config/'.$name.'.php\');';
+        }
         $filePath = self::MODULE_SRC.$moduleName.self::MODULE_FILE_SRC;
         
         $contents = file_get_contents($filePath);

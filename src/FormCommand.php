@@ -35,6 +35,7 @@ class FormCommand extends AbstractCommand
     
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->input = $input;
         $section1 = $output->section();
         $section2 = $output->section();
         $section1->writeln('Start creating a form');
@@ -96,6 +97,10 @@ $this->setAttribute(\'class\', \'styledForm\');'.PHP_EOL.PHP_EOL.$formElements.P
                 'return [];'
             );
         
+        if ($this->isJsonMode($input)) {
+            $code = (json_encode([$name.'.php' => $form->generate()]));
+            $section2->writeln($code);
+        }
         
         //$section2->writeln($rowset->generate());
         $this->storeFormContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$form->generate());

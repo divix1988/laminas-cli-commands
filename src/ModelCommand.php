@@ -35,13 +35,14 @@ class ModelCommand extends AbstractCommand
     
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->input = $input;
         $section1 = $output->section();
         $section2 = $output->section();
         $section1->writeln('Start creating a model');
-        
+
         $moduleName = $this->getModuleName($input, $output, 'model');
         
-        $this->createAbstractModel($moduleName);
+        $this->createAbstractModel($moduleName, $section2);
         
         $name = ucfirst($input->getArgument('name'));
         $exploded = explode('Table', $name);
@@ -158,6 +159,10 @@ parent::deleteRow($id);'
         );
         
         //$section2->writeln($model->generate());
+        if ($this->isJsonMode()) {
+            $code = (json_encode([$name.'Table.php' => $model->generate()]));
+            $section2->writeln($code);
+        }
         $this->storeModelContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$model->generate());
         $section1->writeln('Done creating new model.');
         
@@ -166,11 +171,17 @@ parent::deleteRow($id);'
         return 0;
     }
     
-    protected function createAbstractModel($moduleName)
+    protected function createAbstractModel($moduleName, $section2)
     {
         $abstractContents = file_get_contents(__DIR__.'/Templates/AbstractTable.php');
         
         $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
+        
+        if ($this->isJsonMode()) {
+            $abstractContents = str_replace("<?php", '', $abstractContents);
+            $code = (json_encode(['AbstractTable.php' => $abstractContents]));
+            $section2->writeln($code);
+        }
         
         $this->storeModelContents('AbstractTable.php', $moduleName, $abstractContents);
     }

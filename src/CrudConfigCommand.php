@@ -37,6 +37,7 @@ class CrudConfigCommand extends AbstractCommand
     
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->input = $input;
         $section1 = $output->section();
         $section2 = $output->section();
         $section1->writeln('Start creating a config');

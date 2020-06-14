@@ -39,6 +39,7 @@ class CrudViewCommand extends AbstractCommand
     
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->input = $input;
         $section1 = $output->section();
         $section2 = $output->section();
         $section1->writeln('Start creating a view');
@@ -81,12 +82,17 @@ class CrudViewCommand extends AbstractCommand
         }
         
         if ($name == 'index') {
-            $this->createPaginationView($moduleName, $controllerName);
+            $this->createPaginationView($moduleName, $controllerName, $section2);
         }
        
         $section1->writeln(PHP_EOL.$contents.PHP_EOL);
-        
-        $this->storeViewContents($name.'.phtml', $moduleName, $controllerName, $contents);
+
+        if ($this->isJsonMode()) {
+            $code = (json_encode([$name.'.phtml' => $contents]));
+            $section2->writeln($code);
+        } else {
+            $this->storeViewContents($name.'.phtml', $moduleName, $controllerName, $contents);
+        }
         $section2->writeln('Done creating new view.');
         
         parent::postExecute($input, $output, $section1, $section2);
@@ -94,10 +100,15 @@ class CrudViewCommand extends AbstractCommand
         return 0;
     }
     
-    protected function createPaginationView($moduleName, $controllerName)
+    protected function createPaginationView($moduleName, $controllerName, $section2)
     {
         $pagination = file_get_contents(__DIR__.'/Templates/Crud/View/pagination.phtml');
         
-        $this->storeViewContents('pagination.phtml', $moduleName, $controllerName, $pagination);
+        if ($this->isJsonMode()) {
+            $code = (json_encode(['pagination.phtml' => $pagination]));
+            $section2->writeln($code);
+        } else {
+            $this->storeViewContents('pagination.phtml', $moduleName, $controllerName, $pagination);
+        }
     }
 }

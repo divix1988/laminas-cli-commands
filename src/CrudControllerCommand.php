@@ -33,6 +33,7 @@ class CrudControllerCommand extends ControllerCommand
     
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->input = $input;
         $section1 = $output->section();
         $section2 = $output->section();
 

@@ -35,6 +35,7 @@ class RowsetCommand extends AbstractCommand
     
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->input = $input;
         $section1 = $output->section();
         $section2 = $output->section();
         $section1->writeln('Start creating a rowset');
@@ -109,6 +110,11 @@ return $this;'
             );
         
         $this->createAbstractRowset($moduleName);
+        
+        if ($this->isJsonMode()) {
+            $code = (json_encode([$name.'.php' => $rowset->generate()]));
+            $section2->writeln($code);
+        }
         //$section2->writeln($rowset->generate());
         $this->storeRowsetContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$rowset->generate());
         $section2->writeln('Done creating new rowset.');

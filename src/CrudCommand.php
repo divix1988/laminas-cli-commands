@@ -25,6 +25,20 @@ class CrudCommand extends AbstractCommand
 
     protected function configure()
     {
+        if ($this->registerOtherCommands) {
+            $app = new \Symfony\Component\Console\Application();
+            $app->addCommands([
+                new \Divix\Laminas\Cli\Command\CrudControllerCommand(),
+                new \Divix\Laminas\Cli\Command\CrudViewCommand(),
+                new \Divix\Laminas\Cli\Command\CrudConfigCommand(),
+                new \Divix\Laminas\Cli\Command\ModelCommand(),
+                new \Divix\Laminas\Cli\Command\RowsetCommand(),
+                new \Divix\Laminas\Cli\Command\FormCommand(),
+            ]);
+
+            $this->setApplication($app);
+        }
+        
         $this
             ->setDescription('Creates a new whole module with CRUD methods.')
             ->setHelp('This command allows you to create a Create Update Delete module')
@@ -36,6 +50,7 @@ class CrudCommand extends AbstractCommand
     
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->input = $input;
         $section1 = $output->section();
         $section2 = $output->section();
         $section1->writeln('Start creating a CRUD');
@@ -144,7 +159,8 @@ class CrudCommand extends AbstractCommand
             'name' => $name,
             '--actions' => ['add', 'edit', 'delete'],
             '--module' => $moduleName,
-            '--print_mode' => true
+            '--print_mode' => true,
+            '--json' => $this->isJsonMode()
         ];
 
         $greetInput = new ArrayInput($arguments);
@@ -161,7 +177,8 @@ class CrudCommand extends AbstractCommand
             //'--actions' => ['create', 'update', 'delete'],
             '--module' => $moduleName,
             '--properties' => $properties,
-            '--print_mode' => true
+            '--print_mode' => true,
+            '--json' => $this->isJsonMode()
         ];
 
         $greetInput = new ArrayInput($arguments);
@@ -177,7 +194,8 @@ class CrudCommand extends AbstractCommand
             'name' => rtrim($name, 's'),
             '--module' => $moduleName,
             '--properties' => $properties,
-            '--print_mode' => true
+            '--print_mode' => true,
+            '--json' => $this->isJsonMode()
         ];
 
         $greetInput = new ArrayInput($arguments);
@@ -193,7 +211,8 @@ class CrudCommand extends AbstractCommand
             'name' => $name,
             '--module' => $moduleName,
             '--properties' => $properties,
-            '--print_mode' => true
+            '--print_mode' => true,
+            '--json' => $this->isJsonMode()
         ];
 
         $greetInput = new ArrayInput($arguments);
@@ -209,7 +228,8 @@ class CrudCommand extends AbstractCommand
             'name' => $viewType,
             'controller' => $name,
             '--module' => $moduleName,
-            '--print_mode' => true
+            '--print_mode' => true,
+            '--json' => $this->isJsonMode()
         ];
         
         foreach ($options as $key => $value) {
@@ -230,7 +250,8 @@ class CrudCommand extends AbstractCommand
             '--module' => $moduleName,
             '--name_singular' => rtrim($name, 's'),
             '--name_plural' => $name,
-            '--print_mode' => true
+            '--print_mode' => true,
+            '--json' => $this->isJsonMode()
         ];
 
         $greetInput = new ArrayInput($arguments);

@@ -34,6 +34,7 @@ class ControllerCommand extends AbstractCommand
     
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->input = $input;
         $section1 = $output->section();
         $section2 = $output->section();
         $section1->writeln('Start creating a controller');
@@ -44,9 +45,14 @@ class ControllerCommand extends AbstractCommand
         $actions = $input->getOption('actions');
         
         $controller = $this->getControllerObject($name, $moduleName, $actions);
+        $code = str_replace("\n", '%new_line%', $controller->generate());
         
-        //$section2->writeln(trim(preg_replace('/\s\s+/', ' ', $controller->generate())));
-        $section2->writeln(str_replace("\n", '%new_line%', $controller->generate()));
+        if ($this->isJsonMode($input)) {
+            $code = (json_encode([$name.'.php' => $controller->generate()]));
+            $section2->writeln($code);
+        } else {
+            $section2->writeln(trim(preg_replace('/\s\s+/', ' ', $controller->generate())));
+        }
         
         $this->storeControllerContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$controller->generate());
         $section1->writeln('Done creating new controller [inside]!!!!!!!!!!!!!!!.');
