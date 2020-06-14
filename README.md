@@ -26,6 +26,7 @@ Add the following config into your `config/local.php` file:
         'mvc:crud_controller' => \Divix\Laminas\Cli\Command\CrudControllerCommand::class,
         'mvc:crud_view' => \Divix\Laminas\Cli\Command\CrudViewCommand::class,
         'mvc:crud_model' => \Divix\Laminas\Cli\Command\CrudModelCommand::class,
+        'mvc:crud_config' => \Divix\Laminas\Cli\Command\CrudConfigCommand::class,
     ],
 ],
 ```
@@ -74,7 +75,7 @@ class ControllerNameController extends \Laminas\Mvc\Controller\AbstractActionCon
 ### Model
 Generate sample model with a list of properties:
 ```bash
-"vendor/bin/laminas-cli.bat" mvc:model --properties=<property1> --properties=<property2> --module=ModuleName <name>
+"vendor/bin/laminas.bat" mvc:model --properties=<property1> --properties=<property2> --module=ModuleName <name>
 ```
 New file in: `[root]/module/[moduleName]/src/Model/[name].php`
 
@@ -160,7 +161,7 @@ class ModelNameTable extends AbstractTable
 ### Form
 Generate sample model with a list of properties:
 ```bash
-"vendor/bin/laminas-cli.bat" mvc:form --properties=<property1> --properties=<property2> --module=<ModuleName> <name>
+"vendor/bin/laminas.bat" mvc:form --properties=<property1> --properties=<property2> --module=<ModuleName> <name>
 ```
 New file in: `[root]/module/[moduleName]/src/Form/[name]Form.php`
 
@@ -227,7 +228,7 @@ class NewUserForm extends \Laminas\Form\Form implements \Laminas\InputFilter\Inp
 ### Rowset
 Generate sample rowset with a list of params:
 ```bash
-"vendor/bin/laminas-cli.bat" mvc:rowset --properties=<property1> --properties=<property2> --module=ModuleName <name>
+"vendor/bin/laminas.bat" mvc:rowset --properties=<property1> --properties=<property2> --module=ModuleName <name>
 ```
 New file in: `[root]/module/[moduleName]/src/Model/Rowset/[name].php`
 
@@ -280,7 +281,7 @@ Sample output:
 <p>ModuleName - ViewName</p>
 ```
 
-### CRUD
+## CRUD
 Generate a full working example with Form, Rowset, Model, View and Controller with given name:
 ```bash
 "vendor/bin/laminas.bat" mvc:crud --properties=<property1> --properties=<property2> --module=ModuleName <name>
@@ -298,11 +299,13 @@ New files in:
 [root]/module/[moduleName]/view/[name]/add.phtml
 [root]/module/[moduleName]/view/[name]/delete.phtml
 [root]/module/[moduleName]/view/[name]/edit.phtml
+[root]/module/[moduleName]/config/generated.crud.php
 ```
 
 Configuration in:
-`config/generate.php`
+`config/generated.crud.php`
 
+Sample output for module: `ModuleName` and name: `NewUsers`:
 ```php
 namespace ModuleName;
 
