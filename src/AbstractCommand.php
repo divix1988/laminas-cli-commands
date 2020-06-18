@@ -5,7 +5,7 @@ namespace Divix\Laminas\Cli\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Output\ConsoleSectionOutput;
@@ -35,6 +35,20 @@ class AbstractCommand extends Command
 
     protected function configure()
     {
+        if ($this->registerOtherCommands) {
+            $app = new \Symfony\Component\Console\Application();
+            $app->addCommands([
+                new \Divix\Laminas\Cli\Command\CrudControllerCommand(),
+                new \Divix\Laminas\Cli\Command\CrudViewCommand(),
+                new \Divix\Laminas\Cli\Command\CrudConfigCommand(),
+                new \Divix\Laminas\Cli\Command\ModelCommand(),
+                new \Divix\Laminas\Cli\Command\RowsetCommand(),
+                new \Divix\Laminas\Cli\Command\FormCommand(),
+            ]);
+
+            $this->setApplication($app);
+        }
+        
         $this->addOption('module', null, InputOption::VALUE_OPTIONAL, 'The module name of the component.');
         $this->addOption('print_mode', null, InputOption::VALUE_OPTIONAL, 'Print only the generated file and don\'t store it.');
         $this->addOption('json', null, InputOption::VALUE_OPTIONAL, 'Print only output in josn and do not store the file.');
@@ -84,6 +98,13 @@ class AbstractCommand extends Command
         }
         
         return ucfirst($moduleName);
+    }
+    
+    protected function getPropertiesArray($input): array
+    {
+        $output = $input->getOption('properties');
+        
+        return is_array($output) ? $output : [$output];
     }
     
     protected function storeControllerContents($fileName, $moduleName, $contents): void
@@ -199,5 +220,40 @@ class AbstractCommand extends Command
         );
         
         file_put_contents($filePath, $contents);
+    }
+    
+    protected function generateModel($moduleName, $name, OutputInterface $output, array $properties)
+    {
+        $command = $this->getApplication()->find('mvc:model');
+
+        $arguments = [
+            'command' => 'mvc:model',
+            'name' => $name.'Table',
+            //'--actions' => ['create', 'update', 'delete'],
+            '--module' => $moduleName,
+            '--properties' => $properties,
+            '--print_mode' => true,
+            '--json' => $this->isJsonMode()
+        ];
+
+        $greetInput = new ArrayInput($arguments);
+        $command->run($greetInput, $output);
+    }
+    
+    protected function generateRowset($moduleName, $name, OutputInterface $output, array $properties)
+    {
+        $command = $this->getApplication()->find('mvc:rowset');
+
+        $arguments = [
+            'command' => 'mvc:rowset',
+            'name' => rtrim($name, 's'),
+            '--module' => $moduleName,
+            '--properties' => $properties,
+            '--print_mode' => true,
+            '--json' => $this->isJsonMode()
+        ];
+
+        $greetInput = new ArrayInput($arguments);
+        $command->run($greetInput, $output);
     }
 }

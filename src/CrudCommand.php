@@ -6,13 +6,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Input\ArrayInput;
 
 use Laminas\Code\Generator\ClassGenerator;
-use Laminas\Code\Generator\DocBlockGenerator;
 use Laminas\Code\Generator\PropertyGenerator;
-use Laminas\Code\Generator\MethodGenerator;
 
 /**
  * Usage:
@@ -25,20 +22,6 @@ class CrudCommand extends AbstractCommand
 
     protected function configure()
     {
-        if ($this->registerOtherCommands) {
-            $app = new \Symfony\Component\Console\Application();
-            $app->addCommands([
-                new \Divix\Laminas\Cli\Command\CrudControllerCommand(),
-                new \Divix\Laminas\Cli\Command\CrudViewCommand(),
-                new \Divix\Laminas\Cli\Command\CrudConfigCommand(),
-                new \Divix\Laminas\Cli\Command\ModelCommand(),
-                new \Divix\Laminas\Cli\Command\RowsetCommand(),
-                new \Divix\Laminas\Cli\Command\FormCommand(),
-            ]);
-
-            $this->setApplication($app);
-        }
-        
         $this
             ->setDescription('Creates a new whole module with CRUD methods.')
             ->setHelp('This command allows you to create a Create Update Delete module')
@@ -167,40 +150,6 @@ class CrudCommand extends AbstractCommand
         $command->run($greetInput, $output);
     }
     
-    protected function generateModel($moduleName, $name, OutputInterface $output, array $properties)
-    {
-        $command = $this->getApplication()->find('mvc:model');
-
-        $arguments = [
-            'command' => 'mvc:model',
-            'name' => $name.'Table',
-            //'--actions' => ['create', 'update', 'delete'],
-            '--module' => $moduleName,
-            '--properties' => $properties,
-            '--print_mode' => true,
-            '--json' => $this->isJsonMode()
-        ];
-
-        $greetInput = new ArrayInput($arguments);
-        $command->run($greetInput, $output);
-    }
-    
-    protected function generateRowset($moduleName, $name, OutputInterface $output, array $properties)
-    {
-        $command = $this->getApplication()->find('mvc:rowset');
-
-        $arguments = [
-            'command' => 'mvc:rowset',
-            'name' => rtrim($name, 's'),
-            '--module' => $moduleName,
-            '--properties' => $properties,
-            '--print_mode' => true,
-            '--json' => $this->isJsonMode()
-        ];
-
-        $greetInput = new ArrayInput($arguments);
-        $command->run($greetInput, $output);
-    }
     
     protected function generateForm($moduleName, $name, OutputInterface $output, array $properties)
     {

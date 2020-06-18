@@ -1,0 +1,26 @@
+<section class="page-content">
+    <div class="container jumbotron">
+        <!-- login -->
+        <div class="formContainer">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="box">
+                        <h3><span class="fas fa-lock"></span>Logging</h3>
+                        <?php isset($messages) ? print_r($messages) : '' ?>
+                        <?php
+                            $form->prepare();
+                            echo $this->form()->openTag($form);
+                            echo $this->formRow($form->get('login_fieldset')->get('email'));
+                            echo $this->formRow($form->get('login_fieldset')->get('password'));
+                            echo $this->formRow($form->get('login_fieldset')->get('users_csrf'));
+                            echo $this->formSubmit($form->get('submit'));
+                            echo $this->form()->closeTag();
+                        ?>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

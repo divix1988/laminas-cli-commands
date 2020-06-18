@@ -1,0 +1,33 @@
+<section class="page-content">
+    <div class="container jumbotron">
+        <!-- registration -->
+        <div class="formContainer">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="box">
+                        <h3><span class="fas fa-user"></span>Registration</h3>
+                        <?= isset($messages) ? print_r($messages) : '' ?>
+                        <?php
+                            $userForm->prepare();
+                            echo $this->form()->openTag($userForm);
+                            echo $this->formRow($userForm->get('user_username')->get('username'));
+                            echo $this->formRow($userForm->get('user_login')->get('email'));
+                            echo $this->formRow($userForm->get('user_login')->get('password'));
+                            echo $this->formRow($userForm->get('confirm_password'));
+                            
+%properties%
+                            echo $this->formHidden($userForm->get('user_login')->get('users_csrf'));
+                            echo $this->formSubmit($userForm->get('submit'));
+                            echo $this->form()->closeTag();
+                        ?>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-info">
+                        Fill all the form fileds, to register as new user to the website.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
