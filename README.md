@@ -27,6 +27,7 @@ Add the following config into your `config/local.php` file:
         'mvc:crud_view' => \Divix\Laminas\Cli\Command\CrudViewCommand::class,
         'mvc:crud_model' => \Divix\Laminas\Cli\Command\CrudModelCommand::class,
         'mvc:crud_config' => \Divix\Laminas\Cli\Command\CrudConfigCommand::class,
+        'mvc:login-registration' => \Divix\Laminas\Cli\Command\LoginRegistrationCommand::class
     ],
 ],
 ```
@@ -384,3 +385,18 @@ return [
 ];
 
 ```
+
+## Users Login & Registration [WIP]
+Generate Users registration and login feature with custom user properties
+```bash
+"vendor/bin/laminas.bat" mvc:login-registration --properties=<property1> --properties=<property2> --module=ModuleName
+```
+New files in: 
+```
+[root]/module/[moduleName]/src/Controller/LoginController.php
+[root]/module/[moduleName]/src/Controller/RegisterController.php
+[root]/module/[moduleName]/src/Model/UserModel.php
+```
+Configuration in:
+`config/module.config.php`
+`src/Module.php`
