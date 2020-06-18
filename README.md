@@ -386,7 +386,7 @@ return [
 
 ```
 
-## Users Login & Registration [WIP]
+## Users Login & Registration
 Generate Users registration and login feature with custom user properties
 ```bash
 "vendor/bin/laminas.bat" mvc:login-registration --properties=<property1> --properties=<property2> --module=ModuleName
@@ -396,6 +396,25 @@ New files in:
 [root]/module/[moduleName]/src/Controller/LoginController.php
 [root]/module/[moduleName]/src/Controller/RegisterController.php
 [root]/module/[moduleName]/src/Model/UserModel.php
+```
+Configuration in:
+`config/module.config.php`
+`src/Module.php`
+
+## Admin Panel
+Add an admin panel to your Laminas MVC project and provide Reports and Users managment tool.
+```bash
+"vendor/bin/laminas.bat" mvc:admin --module=ModuleName
+```
+New files in: 
+```
+[root]/module/[moduleName]/src/Controller/AbstractController.php
+[root]/module/[moduleName]/src/Controller/AdminController.php
+[root]/module/[moduleName]/src/view/admin/admin/index.phtml
+[root]/module/[moduleName]/src/view/admin/_shared/footer.phtml
+[root]/module/[moduleName]/src/view/admin/_shared/menu.phtml
+[root]/module/[moduleName]/src/view/layout/admin.phtml
+[root]/module/[moduleName]/src/Model.php
 ```
 Configuration in:
 `config/module.config.php`
