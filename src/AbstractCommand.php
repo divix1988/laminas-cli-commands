@@ -100,9 +100,9 @@ class AbstractCommand extends Command
         return ucfirst($moduleName);
     }
     
-    protected function getPropertiesArray($input): array
+    protected function getPropertiesArray($input, $alias = 'properties'): array
     {
-        $output = $input->getOption('properties');
+        $output = $input->getOption($alias);
         
         return is_array($output) ? $output : [$output];
     }
@@ -255,5 +255,59 @@ class AbstractCommand extends Command
 
         $greetInput = new ArrayInput($arguments);
         $command->run($greetInput, $output);
+    }
+    
+    protected function createSimplePHP($moduleName, $filename, $section2)
+    {
+        $abstractContents = file_get_contents(__DIR__.'/Templates/AdminPanel/'.$filename);
+        $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
+        
+        if ($this->isJsonMode()) {
+            $abstractContents = str_replace("<?php", '', $abstractContents);
+            $code = (json_encode([$filename => $abstractContents]));
+            $section2->writeln($code);
+        }
+        
+        $this->storeControllerContents($filename, $moduleName, $abstractContents);
+    }
+    
+    protected function createStaticController($moduleName, $folder, $filename, $section2)
+    {
+        $abstractContents = file_get_contents(__DIR__.'/Templates/'.$folder.'/'.$filename);
+        $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
+        
+        if ($this->isJsonMode()) {
+            $abstractContents = str_replace("<?php", '', $abstractContents);
+            $code = (json_encode([$filename => $abstractContents]));
+            $section2->writeln($code);
+        }
+        
+        $this->storeControllerContents($filename, $moduleName, $abstractContents);
+    }
+    
+    protected function createStaticConfig($moduleName, $filename, $section2)
+    {
+        $abstractContents = file_get_contents(__DIR__.'/Templates/AdminPanel/'.$filename);
+        $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
+        
+        if ($this->isJsonMode()) {
+            $abstractContents = str_replace("<?php", '', $abstractContents);
+            $code = (json_encode([$filename => $abstractContents]));
+            $section2->writeln($code);
+        }
+        
+        $this->storeControllerContents($filename, $moduleName, $abstractContents);
+    }
+    
+    protected function createStaticView($moduleName, $folder, $filename, $section2)
+    {
+        $abstractContents = file_get_contents(__DIR__.'/Templates/'.$folder.'/'.$filename);
+        
+        if ($this->isJsonMode()) {
+            $code = (json_encode([$filename => $abstractContents]));
+            $section2->writeln($code);
+        }
+        
+        $this->storeViewContents($filename.'.php', $moduleName, 'admin', $abstractContents);
     }
 }

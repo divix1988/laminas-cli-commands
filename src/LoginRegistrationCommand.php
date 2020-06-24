@@ -68,9 +68,9 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->createRegisterController($moduleName, $section2);
         $this->createRegisterView($moduleName, $properties, $section2);
         $this->createHydrator($moduleName, $section2);
-        $this->createStaticForm($moduleName, 'UserLoginFieldset', $section2);
-        $this->createStaticForm($moduleName, 'UserLoginForm', $section2);
-        $this->createStaticForm($moduleName, 'UsernameFieldset', $section2);
+        $this->createStaticForm($moduleName, 'AdminPanel/View', 'UserLoginFieldset', $section2);
+        $this->createStaticForm($moduleName, 'AdminPanel/View', 'UserLoginForm', $section2);
+        $this->createStaticForm($moduleName, 'AdminPanel/View', 'UsernameFieldset', $section2);
         $this->createUserRegisterForm($moduleName, $properties, $section2);
         
         
@@ -241,20 +241,6 @@ public function bootstrapSession($e)
         $this->storeControllerContents('UserController.php', $moduleName, $abstractContents);
     }
     
-    protected function createUserView($moduleName, $section2)
-    {
-        $abstractContents = file_get_contents(__DIR__.'/Templates/LoginRegister/View/user.phtml');
-        
-        //@TODO amend user properties 
-        
-        if ($this->isJsonMode()) {
-            $code = (json_encode(['user/index.phtml' => $abstractContents]));
-            $section2->writeln($code);
-        }
-        
-        $this->storeViewContents('index.phtml', $moduleName, 'register', $abstractContents);
-    }
-    
     protected function createRegisterView($moduleName, $properties, $section2)
     {
         $abstractContents = file_get_contents(__DIR__.'/Templates/LoginRegister/View/register.phtml');
@@ -285,18 +271,6 @@ public function bootstrapSession($e)
         }
         
         $this->storeViewContents('index.phtml', $moduleName, 'register', $abstractContents);
-    }
-    
-    protected function createLoginView($moduleName, $section2)
-    {
-        $abstractContents = file_get_contents(__DIR__.'/Templates/LoginRegister/View/login.phtml');
-        
-        if ($this->isJsonMode()) {
-            $code = (json_encode(['login/index.phtml' => $abstractContents]));
-            $section2->writeln($code);
-        }
-        
-        $this->storeViewContents('index.phtml', $moduleName, 'login', $abstractContents);
     }
     
     protected function createStaticForm($moduleName, $filename, $section2)
@@ -340,5 +314,31 @@ public function bootstrapSession($e)
         }
         
         $this->storeFormContents('UserRegisterForm.php', $moduleName, $abstractContents);
+    }
+    
+    protected function createUserView($moduleName, $section2)
+    {
+        $abstractContents = file_get_contents(__DIR__.'/Templates/LoginRegister/View/user.phtml');
+        
+        //@TODO amend user properties 
+        
+        if ($this->isJsonMode()) {
+            $code = (json_encode(['user/index.phtml' => $abstractContents]));
+            $section2->writeln($code);
+        }
+        
+        $this->storeViewContents('index.phtml', $moduleName, 'register', $abstractContents);
+    }
+    
+    protected function createLoginView($moduleName, $section2)
+    {
+        $abstractContents = file_get_contents(__DIR__.'/Templates/LoginRegister/View/login.phtml');
+        
+        if ($this->isJsonMode()) {
+            $code = (json_encode(['login/index.phtml' => $abstractContents]));
+            $section2->writeln($code);
+        }
+        
+        $this->storeViewContents('index.phtml', $moduleName, 'login', $abstractContents);
     }
 }
