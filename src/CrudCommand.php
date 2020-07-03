@@ -61,7 +61,7 @@ class CrudCommand extends AbstractCommand
         }
         
         $section1->writeln('Start creating new Controller.');
-        $this->generateController($moduleName, $name, $output);
+        $this->generateCrudController($moduleName, $name, $output);
         $section1->writeln('End creating new Controller.');
         
         $section1->writeln('Start creating new Model.');
@@ -77,7 +77,7 @@ class CrudCommand extends AbstractCommand
         $section1->writeln('End creating new Form.');
         
         $section1->writeln('Start creating Views for: index.phtml, create.phtml, update.phtml and delete.phtml.');
-        $this->generateView(
+        $this->generateCrudView(
             $moduleName, 
             $name, 
             $output,
@@ -88,7 +88,7 @@ class CrudCommand extends AbstractCommand
                 'columns' => $properties
             ]
         );
-        $this->generateView(
+        $this->generateCrudView(
             $moduleName, 
             $name, 
             $output,
@@ -98,7 +98,7 @@ class CrudCommand extends AbstractCommand
                 'name_plural' => $name
             ]
         );
-        $this->generateView(
+        $this->generateCrudView(
             $moduleName, 
             $name, 
             $output,
@@ -109,7 +109,7 @@ class CrudCommand extends AbstractCommand
                 'columns' => $properties
             ]
         );
-        $this->generateView(
+        $this->generateCrudView(
             $moduleName, 
             $name, 
             $output,
@@ -133,7 +133,7 @@ class CrudCommand extends AbstractCommand
         return 0;
     }
     
-    protected function generateController($moduleName, $name, OutputInterface $output)
+    protected function generateCrudController($moduleName, $name, OutputInterface $output)
     {
         $command = $this->getApplication()->find('mvc:crud_controller');
 
@@ -168,7 +168,7 @@ class CrudCommand extends AbstractCommand
         $command->run($greetInput, $output);
     }
     
-    protected function generateView($moduleName, $name, OutputInterface $output, $viewType, array $options = [])
+    protected function generateCrudView($moduleName, $name, OutputInterface $output, $viewType, array $options = [])
     {
         $command = $this->getApplication()->find('mvc:crud_view');
 

@@ -44,6 +44,8 @@ class AbstractCommand extends Command
                 new \Divix\Laminas\Cli\Command\ModelCommand(),
                 new \Divix\Laminas\Cli\Command\RowsetCommand(),
                 new \Divix\Laminas\Cli\Command\FormCommand(),
+                new \Divix\Laminas\Cli\Command\ViewCommand(),
+                new \Divix\Laminas\Cli\Command\ControllerCommand(),
             ]);
 
             $this->setApplication($app);

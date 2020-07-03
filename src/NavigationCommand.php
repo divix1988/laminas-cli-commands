@@ -6,6 +6,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\ArrayInput;
 
 /**
  * Usage:
@@ -22,7 +23,8 @@ class NavigationCommand extends AbstractCommand
             ->setDescription('Creates a new navigation feature.')
             ->setHelp('This command allows you to create a MVC navigation')
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the navigation.')
-            ->addOption('items', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL, 'Navigation items list');
+            ->addOption('items', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL, 'Navigation items list')
+            ->addOption('include_controller', null, InputOption::VALUE_OPTIONAL, 'Create Navigation controller');
         
         parent::configure();
     }
@@ -59,6 +61,12 @@ class NavigationCommand extends AbstractCommand
             
             $globalPhpCode .= 
 '    ]
+],
+
+\'service_manager\' => [
+    \'abstract_factories\' => [
+        Laminas\Navigation\Service\NavigationAbstractServiceFactory::class,
+    ]
 ]
 
 ...
@@ -70,9 +78,9 @@ class NavigationCommand extends AbstractCommand
 '
 ...
 
-<?= $this->navigation(\'Laminas\Navigation\Default\')->menu()
+<?= $this->navigation(\'Laminas\Navigation\\'.$name.')->menu()
     ->setMaxDepth(2)
-    ->setPartial(\''.$moduleName.'/_shared/menu\')
+    ->setPartial(\'_shared/menu\')
     ->setRenderInvisible(false)
     ->renderPartialWithParams(
         [
@@ -81,10 +89,38 @@ class NavigationCommand extends AbstractCommand
     )
 ?>
 
+...',
+                'module.config.php' => 
+'...
+    
+\'view_manager\' => [
+    ...
+    \'template_path_stack\' => [
+        __DIR__ . \'/../view\',
+        __DIR__ . \'/../view/'.$moduleName.'/_shared\'
+    ],
+],
+
+...
+
+\'router\' => [
+    \'routes\' => [
+            ...
+            
+'.$this->getRoutesCode($name, $moduleName, $inputItems).'
+        ]
+    ]
+]
+
 ...'
             ]));
             
             $this->createStaticView($moduleName, 'Navigation/View', 'menu.phtml', $section2);
+            
+            if (!empty($input->getOption('include_controller'))) {
+                $this->generateController($moduleName, $name, $output, $inputItems);
+                $this->generateViews($moduleName, $name, $output, $inputItems);
+            }
             
             $section2->writeln($code);
         }
@@ -95,6 +131,80 @@ class NavigationCommand extends AbstractCommand
         parent::postExecute($input, $output, $section1, $section2);
 
         return 0;
+    }
+    
+    protected function getRoutesCode($name, $moduleName, $inputItems)
+    {
+        $out = '';
+        
+        foreach ($inputItems as $item) {
+            $lowerItem = strtolower($item);
+            $out .= 
+'            \''.$lowerItem.'\' => [
+                 \'type\'    => \Laminas\Router\Http\Literal::class,
+                 \'options\' => [
+                     \'route\'    => \'/'.$lowerItem.'\',
+                     \'defaults\' => [
+                         \'controller\' => Controller\\'.$item.'MenuController::class,
+                         \'action\'     => \''.$lowerItem.'\',
+                     ],
+                 ],
+            ],'.PHP_EOL;
+        }
+        
+        return $out;
+    }
+    
+    protected function generateViews($moduleName, $name, OutputInterface $output, $inputItems)
+    {
+        
+        foreach ($inputItems as $item) {
+            $this->generateView(
+                $moduleName, 
+                $name, 
+                $output,
+                $item
+            );
+        }
+
+    }
+    
+    protected function generateView($moduleName, $name, OutputInterface $output, $viewName, array $options = [])
+    {
+        $command = $this->getApplication()->find('mvc:view');
+
+        $arguments = [
+            'command' => 'mvc:view',
+            'name' => $viewName,
+            'controller' => $name,
+            '--module' => $moduleName,
+            '--print_mode' => true,
+            '--json' => $this->isJsonMode()
+        ];
+        
+        foreach ($options as $key => $value) {
+            $arguments['--'.$key] = $value;
+        }
+
+        $greetInput = new ArrayInput($arguments);
+        $command->run($greetInput, $output);
+    }
+    
+    protected function generateController($moduleName, $name, OutputInterface $output, $items)
+    {
+        $command = $this->getApplication()->find('mvc:controller');
+
+        $arguments = [
+            'command' => 'mvc:controller',
+            'name' => $name.'Menu',
+            '--actions' => $items,
+            '--module' => $moduleName,
+            '--print_mode' => true,
+            '--json' => $this->isJsonMode()
+        ];
+
+        $greetInput = new ArrayInput($arguments);
+        $command->run($greetInput, $output);
     }
     
 }

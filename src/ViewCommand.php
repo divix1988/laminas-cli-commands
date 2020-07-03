@@ -35,6 +35,7 @@ class ViewCommand extends AbstractCommand
     
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->input = $input;
         $section1 = $output->section();
         $section2 = $output->section();
         $section1->writeln('Start creating a view');
@@ -47,7 +48,12 @@ class ViewCommand extends AbstractCommand
         
         $section2->writeln(PHP_EOL.$contents.PHP_EOL);
         
-        $this->storeViewContents($name.'.phtml', $moduleName, $controllerName, $contents);
+        if ($this->isJsonMode()) {
+            $code = (json_encode([$name.'.phtml' => $contents]));
+            $section2->writeln($code);
+        } else {
+            $this->storeViewContents($name.'.phtml', $moduleName, $controllerName, $contents);
+        }
         $section1->writeln('Done creating new view.');
         
         parent::postExecute($input, $output, $section1, $section2);
