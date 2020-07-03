@@ -27,7 +27,10 @@ Add the following config into your `config/local.php` file:
         'mvc:crud_view' => \Divix\Laminas\Cli\Command\CrudViewCommand::class,
         'mvc:crud_model' => \Divix\Laminas\Cli\Command\CrudModelCommand::class,
         'mvc:crud_config' => \Divix\Laminas\Cli\Command\CrudConfigCommand::class,
-        'mvc:login-registration' => \Divix\Laminas\Cli\Command\LoginRegistrationCommand::class
+        'mvc:login-registration' => \Divix\Laminas\Cli\Command\LoginRegistrationCommand::class,
+        'mvc:admin' => \Divix\Laminas\Cli\Command\AdminPanelCommand::class,
+        'mvc:navigation' => \Divix\Laminas\Cli\Command\NavigationCommand::class,
+        'mvc:sitemap' => \Divix\Laminas\Cli\Command\SitemapCommand::class,
     ],
 ],
 ```
@@ -419,3 +422,31 @@ New files in:
 Configuration in:
 `config/module.config.php`
 `src/Module.php`
+
+## Navigation
+Add a default menu navigation specified with given items.
+```bash
+"vendor/bin/laminas.bat" mvc:navigation --items=<item1> --items=<item2> --module=ModuleName <name>
+```
+New files in: 
+```
+[root]/module/[moduleName]/src/Controller/AbstractController.php
+[root]/module/[moduleName]/src/Controller/AdminController.php
+[root]/module/[moduleName]/src/view/[moduleName]/layout/layout.phtml
+[root]/module/[moduleName]/src/view/_shared/menu.phtml
+```
+Configuration in:
+`config/autoload/global.php`
+
+## Sitemap
+Add a sitemap controller serving file in XML Google foramt.
+```bash
+"vendor/bin/laminas.bat" mvc:sitemap --module=ModuleName <name>
+```
+New files in: 
+```
+[root]/module/[moduleName]/src/Controller/SitemapController.php
+[root]/module/[moduleName]/src/view/[moduleName]/sitemap/index.phtml
+```
+Configuration in:
+`[root]/module/[moduleName]/config/module.config.php`
