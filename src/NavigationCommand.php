@@ -92,6 +92,15 @@ class NavigationCommand extends AbstractCommand
 ...',
                 'module.config.php' => 
 '...
+   
+\'controllers\' => [
+    \'factories\' => [
+        ...
+        Controller\\'.$name.'MenuController::class => InvokableFactory::class,
+    ],
+],
+
+...
     
 \'view_manager\' => [
     ...
@@ -138,14 +147,14 @@ class NavigationCommand extends AbstractCommand
         $out = '';
         
         foreach ($inputItems as $item) {
-            $lowerItem = strtolower($item);
+            $lowerItem = str_replace(' ', '', trim(strtolower($item)));
             $out .= 
 '            \''.$lowerItem.'\' => [
                  \'type\'    => \Laminas\Router\Http\Literal::class,
                  \'options\' => [
                      \'route\'    => \'/'.$lowerItem.'\',
                      \'defaults\' => [
-                         \'controller\' => Controller\\'.$item.'MenuController::class,
+                         \'controller\' => Controller\\'.$name.'MenuController::class,
                          \'action\'     => \''.$lowerItem.'\',
                      ],
                  ],
@@ -163,7 +172,7 @@ class NavigationCommand extends AbstractCommand
                 $moduleName, 
                 $name, 
                 $output,
-                $item
+                strtolower(str_replace(' ', '', $item))
             );
         }
 

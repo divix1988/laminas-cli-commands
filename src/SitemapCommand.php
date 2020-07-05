@@ -16,7 +16,7 @@ use Laminas\Code\Generator\MethodGenerator;
 /**
  * Usage:
  * 
- * "vendor/bin/laminas-cli.bat" mvc:sitemap --properties=<property1> --properties=<property2> --module=<moduleName> <name>
+ * "vendor/bin/laminas-cli.bat" mvc:sitemap --properties=<property1> --properties=<property2> --module=<moduleName> <name> <menu_name>
  */
 class SitemapCommand extends AbstractCommand
 {
@@ -28,7 +28,7 @@ class SitemapCommand extends AbstractCommand
             ->setDescription('Creates a new sitemap.')
             ->setHelp('This command allows you to create a sitemap')
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the sitemap.')
-            ->addOption('properties', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL, 'Property names list');
+            ->addArgument('menu_name', InputArgument::REQUIRED, 'The name of the related menu.');
         
         parent::configure();
     }
@@ -43,10 +43,50 @@ class SitemapCommand extends AbstractCommand
         $moduleName = $this->getModuleName($input, $output, 'sitemap');
         
         $name = ucfirst(rtrim($input->getArgument('name'), 's')).'Controller';
-        $properties = $input->getOption('properties');
+        $menuName = ucfirst(rtrim($input->getArgument('menu_name'), 's'));
                 
-        $this->createStaticController($moduleName, 'Sitemap', 'SitemapController.php', $section2);
+        $this->createStaticController($moduleName, 'Sitemap', 'SitemapController.php', $section2, $name);
         $this->createStaticView($moduleName, 'Sitemap/View', 'index.phtml', $section2);
+        
+        $code = (json_encode([
+                'module.config.php' => 
+'...
+   
+\'controllers\' => [
+    \'factories\' => [
+        ...
+        Controller\\'.$name.'::class => function($sm) {
+            return new Controller\\'.$name.'(
+                $sm->get(\'Laminas\Navigation\\'.$menuName.'\')
+            );
+        },
+    ],
+],
+
+...
+
+\'router\' => [
+    \'routes\' => [
+            ...
+            
+            \'sitemap\' => [
+                \'type\' => Literal::class,
+                \'options\' => [
+                    \'route\' => \'/sitemap.xml\',
+                    \'defaults\' => [
+                        \'controller\' => Controller\\'.$name.'::class,
+                        \'action\' => \'index\',
+                    ],
+                ],
+            ],
+        ]
+    ]
+]
+
+...'
+        ]));
+        
+        $section2->writeln($code);
         
         $section2->writeln('Done creating new sitemap.');
         

@@ -273,18 +273,22 @@ class AbstractCommand extends Command
         $this->storeControllerContents($filename, $moduleName, $abstractContents);
     }
     
-    protected function createStaticController($moduleName, $folder, $filename, $section2)
+    protected function createStaticController($moduleName, $folder, $filename, $section2, $newName = null)
     {
         $abstractContents = file_get_contents(__DIR__.'/Templates/'.$folder.'/'.$filename);
         $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
         
+        if (!isset($newName)) {
+            $newName = $filename;
+        }
+        
         if ($this->isJsonMode()) {
             $abstractContents = str_replace("<?php", '', $abstractContents);
-            $code = (json_encode([$filename => $abstractContents]));
+            $code = (json_encode([$newName => $abstractContents]));
             $section2->writeln($code);
         }
         
-        $this->storeControllerContents($filename, $moduleName, $abstractContents);
+        $this->storeControllerContents($newName, $moduleName, $abstractContents);
     }
     
     protected function createStaticConfig($moduleName, $filename, $section2)

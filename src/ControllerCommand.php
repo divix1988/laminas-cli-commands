@@ -41,7 +41,7 @@ class ControllerCommand extends AbstractCommand
         
         $moduleName = $this->getModuleName($input, $output, 'controller');
         
-        $name = ucfirst($input->getArgument('name')) . 'Controller';
+        $name = str_replace(' ', '', ucfirst($input->getArgument('name'))) . 'Controller';
         $actions = $input->getOption('actions');
         
         $controller = $this->getControllerObject($name, $moduleName, $actions);
@@ -78,7 +78,7 @@ class ControllerCommand extends AbstractCommand
         
         foreach ($methodActions as $action) {
             $controller->addMethod(
-                $action . 'Action'
+                strtolower(str_replace(' ', '', $action)) . 'Action'
             );
         }
         return $controller;

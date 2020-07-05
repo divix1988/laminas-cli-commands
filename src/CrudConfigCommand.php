@@ -59,6 +59,10 @@ class CrudConfigCommand extends AbstractCommand
         $contents = str_replace("%name_plural_dashed%", $this->convertCamelCaseToDashes($input->getOption('name_plural')), $contents);
         $contents = str_replace("%module_name_plural_dashed%", $this->convertCamelCaseToDashes($moduleName), $contents);
        
+        if ($this->isJsonMode()) {
+            $code = (json_encode([$name.'.php' => $contents]));
+            $section2->writeln($code);
+        }
         $section2->writeln(PHP_EOL.$contents.PHP_EOL);
         
         $this->storeConfigContents($name.'.php', $moduleName, $contents);

@@ -160,7 +160,7 @@ parent::deleteRow($id);'
         
         //$section2->writeln($model->generate());
         if ($this->isJsonMode()) {
-            $code = (json_encode([$name.'Table.php' => $model->generate()]));
+            $code = (json_encode([$name.'.php' => $model->generate()]));
             $section2->writeln($code);
         }
         $this->storeModelContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$model->generate());
