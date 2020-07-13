@@ -68,9 +68,9 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->createRegisterController($moduleName, $section2);
         $this->createRegisterView($moduleName, $properties, $section2);
         $this->createHydrator($moduleName, $section2);
-        $this->createStaticForm($moduleName, 'AdminPanel/View', 'UserLoginFieldset', $section2);
-        $this->createStaticForm($moduleName, 'AdminPanel/View', 'UserLoginForm', $section2);
-        $this->createStaticForm($moduleName, 'AdminPanel/View', 'UsernameFieldset', $section2);
+        $this->createStaticForm($moduleName, 'UserLoginFieldset', $section2);
+        $this->createStaticForm($moduleName, 'UserLoginForm', $section2);
+        $this->createStaticForm($moduleName, 'UsernameFieldset', $section2);
         $this->createUserRegisterForm($moduleName, $properties, $section2);
         
         

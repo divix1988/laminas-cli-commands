@@ -30,6 +30,8 @@ class AbstractCommand extends Command
     public function __construct($setRegisterOtherCommands = false)
     {
         $this->registerOtherCommands = $setRegisterOtherCommands;
+        define('APPLICATION_PATH', realpath(__DIR__ . '/../../../../'));
+        
         parent::__construct();
     }
 
@@ -315,5 +317,126 @@ class AbstractCommand extends Command
         }
         
         $this->storeViewContents($filename.'.php', $moduleName, 'admin', $abstractContents);
+    }
+    
+    protected function injectConfigCodes(array $input, $section, $moduleName, $configType)
+    {
+        if ($this->isJsonMode()) {
+            $output = [];
+            foreach ($input as $filename => &$contents) {
+                if (is_array($contents)) {
+                    foreach ($contents as $sectionName => &$newContents) {
+                        if (!isset($output[$filename])) {
+                            $output[$filename] = '';
+                        }
+                        $output[$filename] .= '...'.PHP_EOL.$newContents.PHP_EOL.'...';
+                    }
+                } else {
+                    $output[$filename] = '...'.PHP_EOL.$contents.PHP_EOL.'...';
+                }
+            }
+
+            $section->writeln(json_encode($output));
+        } else {
+            foreach ($input as $filename => $contents) {
+                if (!is_array($contents)) {
+                    $contents = array($contents);
+                }
+                    
+                foreach ($contents as $sectionName => $newContents) {
+                    $this->updateConfigFile($filename, $sectionName, $newContents, $moduleName, $configType);
+                }
+            }
+        }
+    }
+    
+    protected function updateConfigFile($filename, $sectionName, $newContents, $moduleName, $configType = 'main')
+    {
+        if ($configType === 'main') {
+            $filePath = APPLICATION_PATH.'\config\\'.$filename;
+            $fileContents = file_get_contents($filePath);
+        } else if ($configType === 'module') {
+            $filePath = APPLICATION_PATH.'\module\\'.$moduleName.'\config\\'.$filename;
+            $fileContents = file_get_contents($filePath);
+        } else {
+            throw new Exception('invalid configType');
+        }
+        $sectionNames = explode('/', $sectionName);
+        $sectionNameString = "'".end($sectionNames)."' => ";
+        $noSpacesContents = preg_replace('/\s+/', '', $fileContents);
+        
+        if (strpos($noSpacesContents, preg_replace('/\s+/', '', $sectionNameString)) > 0) {
+            //section already exists
+            $output = preg_replace('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $newContents, $fileContents);
+        } else {
+            //section is missing in root
+            exit('in1');
+            if (count($sectionNames) === 1) {
+                //find last ] char and replace it with new section
+                $output = preg_replace("~\]\s*(.*)$~", $newContents.PHP_EOL.']', $fileContents);
+            } else {
+                //section is missing in nested level ONLY 2nd level is supported ATM
+                // @TODO
+                if (count($sectionNames) === 2) {
+                    $parentSectionName = $sectionNames[0];
+                    
+                    exit('in2');
+                    if (strpos($noSpacesContents, preg_replace('/\s+/', '', $parentSectionName)) > 0) {
+                        //parent exists
+                        exit('in3');
+                        $output = preg_replace('/(\''.$parentSectionName.'\' => )(\[((?>[^\[\]]++|(?2))*)\])/', $newContents, $fileContents);
+                    } else {
+                        //parent is missing
+                        //find last ] char in section and append new code
+                        $output = preg_replace("\]\s*(.*)$", $newContents.PHP_EOL.']', $fileContents);
+                    }
+                }
+            }
+        }
+        
+        echo PHP_EOL.'output: '.PHP_EOL.$output;
+        //file_put_contents($filePath, $output);
+    }
+    
+    protected function injectPhtmlCodes(array $input, $section, $moduleName)
+    {
+        if ($this->isJsonMode()) {
+            $output = [];
+            foreach ($input as $filename => &$contents) {
+                if (is_array($contents)) {
+                    foreach ($contents as $sectionName => &$newContents) {
+                        if (!isset($output[$filename])) {
+                            $output[$filename] = '';
+                        }
+                        $output[$filename] .= '...'.PHP_EOL.$newContents.PHP_EOL.'...';
+                    }
+                } else {
+                    $output[$filename] = '...'.PHP_EOL.$contents.PHP_EOL.'...';
+                }
+            }
+
+            $section->writeln(json_encode($output));
+        } else {
+            foreach ($input as $filename => $contents) {
+                if (!is_array($contents)) {
+                    $contents = array($contents);
+                }
+                    
+                foreach ($contents as $sectionName => $newContents) {
+                    $this->appendCodeToViewFile($filename, $moduleName, $newContents);
+                }
+                
+                $section->writeln('Injected code into '.$filename);
+            }
+        }
+    }
+    
+    protected function appendCodeToViewFile($filename, $moduleName, $newContents)
+    {
+        $fileContents = file_get_contents(APPLICATION_PATH.'\module\\'.$moduleName.'\view\\'.$filename);
+        
+        $fileContents .= PHP_EOL.$newContents;
+        
+        file_put_contents(APPLICATION_PATH.'\module\\'.$moduleName.'\view\\'.$filename, $fileContents);
     }
 }
