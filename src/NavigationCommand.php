@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 /**
  * Usage:
  * 
- * "vendor/bin/laminas-cli.bat" mvc:navigation --module=<moduleName> --items<item1> --items<item2> --include_controller=<boolean> <name>
+ * "vendor/bin/laminas.bat" mvc:navigation --module=<moduleName> --items<item1> --items<item2> --include_controller=<boolean> <name>
  */
 class NavigationCommand extends AbstractCommand
 {
@@ -42,25 +42,21 @@ class NavigationCommand extends AbstractCommand
         
         $globalPhpCode = 
 '
-\'navigation\' => [
-\''.$name.'\' => [
+        \''.$name.'\' => [
 ';
 
         foreach ($inputItems as $item) {
             $globalPhpCode .= 
-'        [
-        \'label\' => \''.$item.'\',
-        \'route\' => \''. str_replace(' ', '', strtolower($item)).'\',
-        \'priority\' => \'1.0\'
-    ],
+'            [
+                \'label\' => \''.$item.'\',
+                \'route\' => \''. str_replace(' ', '', strtolower($item)).'\',
+                \'priority\' => \'1.0\'
+            ],
 ';
         }
 
         $globalPhpCode .= 
-'    ]
-],
-
-
+'       ],
 ';
         $this->injectPhtmlCodes([
             'layout/layout.phtml' => 
@@ -83,22 +79,22 @@ class NavigationCommand extends AbstractCommand
 
         $this->injectConfigCodes([
             'autoload/global.php' => [
-                //'navigation' => $globalPhpCode,
+                ('navigation/'.$name) => $globalPhpCode,
                 'service_manager/abstract_factories' => 
-'Laminas\Navigation\Service\NavigationAbstractServiceFactory::class2,'
+'Laminas\Navigation\Service\NavigationAbstractServiceFactory::class,'
             ],
         ], $section2, $moduleName, 'main');
-        exit();
+
         $this->injectConfigCodes([
             'module.config.php' => [
                 'controllers/factories' =>
 '
-    Controller\\'.$name.'MenuController::class => InvokableFactory::class,
+            Controller\\'.$name.'MenuController::class => InvokableFactory::class,
 ',
                 'view_manager/template_path_stack' => 
 '    
-    __DIR__ . \'/../view\',
-    __DIR__ . \'/../view/'.$moduleName.'/_shared\'
+            __DIR__ . \'/../view\',
+            __DIR__ . \'/../view/'.$moduleName.'/_shared\'
 ',
                 'router/routes' =>
 '
@@ -108,7 +104,7 @@ class NavigationCommand extends AbstractCommand
         ], $section2, $moduleName, 'module');
 
         $this->createStaticView($moduleName, 'Navigation/View', 'menu.phtml', $section2);
-            
+        
         if (!empty($input->getOption('include_controller'))) {
             $this->generateController($moduleName, $name, $output, $inputItems);
             $this->generateViews($moduleName, $name, $output, $inputItems);

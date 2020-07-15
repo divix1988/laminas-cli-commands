@@ -30,7 +30,9 @@ class AbstractCommand extends Command
     public function __construct($setRegisterOtherCommands = false)
     {
         $this->registerOtherCommands = $setRegisterOtherCommands;
-        define('APPLICATION_PATH', realpath(__DIR__ . '/../../../../'));
+        if (!defined('APPLICATION_PATH')) {
+            define('APPLICATION_PATH', realpath(__DIR__ . '/../../../../'));
+        }
         
         parent::__construct();
     }
@@ -325,11 +327,35 @@ class AbstractCommand extends Command
             $output = [];
             foreach ($input as $filename => &$contents) {
                 if (is_array($contents)) {
+                    
                     foreach ($contents as $sectionName => &$newContents) {
+                        $firstSectionNameString = "'".key(reset($section))."' => ";
+                    
+                        if (strpos($newContents, $firstSectionNameString) !== 0) {
+                            $sectionNames = explode('/', $sectionName);
+                            $sectionNamesReversed = array_reverse($sectionNames);
+                            $sectionNamesLength = count($sectionNames);
+                            $noSpacesContents = preg_replace('/\s+/', '', $newContents);
+                            //injected contents don't have section names include so append it
+                            foreach ($sectionNamesReversed as $index => $tempSectionName) {
+                                if (count($sectionNames) > 1 && strpos($noSpacesContents, preg_replace('/\s+/', '', $tempSectionName)) !== false) {
+                                    continue;
+                                }
+                                //echo 'str_pos '.$noSpacesContents, preg_replace('/\s+/', '', $tempSectionName).strpos($noSpacesContents, preg_replace('/\s+/', '', $tempSectionName)).' count: '.count($sectionNames).PHP_EOL;
+                                $numberOfSpaces = $sectionNamesLength * 4;
+                                $spaces = str_repeat(' ', $numberOfSpaces);
+
+                                $newContents = rtrim("'".$tempSectionName."' => [".PHP_EOL.$spaces.'    ...'.PHP_EOL.$spaces.'    '.$newContents.PHP_EOL.$spaces.'],', ',');
+
+                                $sectionNamesLength--;
+                            }
+                        }
+                        
                         if (!isset($output[$filename])) {
                             $output[$filename] = '';
                         }
-                        $output[$filename] .= '...'.PHP_EOL.$newContents.PHP_EOL.'...';
+                        
+                        $output[$filename] .= PHP_EOL.$newContents.PHP_EOL.'...';
                     }
                 } else {
                     $output[$filename] = '...'.PHP_EOL.$contents.PHP_EOL.'...';
@@ -362,15 +388,37 @@ class AbstractCommand extends Command
             throw new Exception('invalid configType');
         }
         $sectionNames = explode('/', $sectionName);
+        $firstSectionNameString = "'".reset($sectionNames)."' => ";
+        $lastSectionNameString = "'".end($sectionNames)."'";
+        
         $sectionNameString = "'".end($sectionNames)."' => ";
         $noSpacesContents = preg_replace('/\s+/', '', $fileContents);
+        $noSpacesNewContents = preg_replace('/\s+/', '', $newContents);
+        
+        if (strpos($newContents, $firstSectionNameString) !== 0 && strpos($noSpacesNewContents, $lastSectionNameString) !== 0) {
+            $sectionNamesReversed = array_reverse($sectionNames);
+            $sectionNamesLength = count($sectionNames);
+            //injected contents don't have section names include so append it
+            foreach ($sectionNamesReversed as $index => $tempSectionName) {
+                if (count($sectionNames) > 1 && $index == 1 && strpos($noSpacesContents, preg_replace('/\s+/', '', $tempSectionName)) !== false) {
+                    continue;
+                }
+                $numberOfSpaces = $sectionNamesLength * 4;
+                $spaces = str_repeat(' ', $numberOfSpaces);
+
+                $newContents = rtrim("'".$tempSectionName."' => [".PHP_EOL.$spaces.'    '.$newContents.PHP_EOL.$spaces.'],', ',');
+
+                $sectionNamesLength--;
+            }
+        }
         
         if (strpos($noSpacesContents, preg_replace('/\s+/', '', $sectionNameString)) > 0) {
             //section already exists
             $output = preg_replace('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $newContents, $fileContents);
         } else {
             //section is missing in root
-            exit('in1');
+            $newContents = '    '.$newContents;
+            
             if (count($sectionNames) === 1) {
                 //find last ] char and replace it with new section
                 $output = preg_replace("~\]\s*(.*)$~", $newContents.PHP_EOL.']', $fileContents);
@@ -380,22 +428,20 @@ class AbstractCommand extends Command
                 if (count($sectionNames) === 2) {
                     $parentSectionName = $sectionNames[0];
                     
-                    exit('in2');
                     if (strpos($noSpacesContents, preg_replace('/\s+/', '', $parentSectionName)) > 0) {
                         //parent exists
-                        exit('in3');
                         $output = preg_replace('/(\''.$parentSectionName.'\' => )(\[((?>[^\[\]]++|(?2))*)\])/', $newContents, $fileContents);
                     } else {
                         //parent is missing
                         //find last ] char in section and append new code
-                        $output = preg_replace("\]\s*(.*)$", $newContents.PHP_EOL.']', $fileContents);
+                        $output = preg_replace("~\]\s*(.*)$~", $newContents.PHP_EOL.']', $fileContents);
                     }
                 }
             }
         }
         
-        echo PHP_EOL.'output: '.PHP_EOL.$output;
-        //file_put_contents($filePath, $output);
+        //echo PHP_EOL.'output: '.PHP_EOL.$output;
+        file_put_contents($filePath, $output);
     }
     
     protected function injectPhtmlCodes(array $input, $section, $moduleName)
