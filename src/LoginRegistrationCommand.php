@@ -79,44 +79,68 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->createUserController($moduleName, $section2);
         $this->createUserView($moduleName, $section2);
         
+        $this->injectConfigCodes([
+            'autoload/global.php' => [
+                'session' => 
+'\'config\' => [
+            \'class\' => \Laminas\Session\Config\SessionConfig::class,
+            \'options\' => [
+                \'name\' => \'session_name\',
+            ],
+        ],
+        \'storage\' => \Laminas\Session\Storage\SessionArrayStorage::class,
+        \'validators\' => [
+            \Laminas\Session\Validator\RemoteAddr::class,
+            \Laminas\Session\Validator\HttpUserAgent::class,
+        ]'
+            ],
+        ], $section2, $moduleName, 'main');
+        
+        $this->injectConfigCodes([
+            'module.config.php' => [
+                'router/routes' =>
+'
+            \'register\' => [
+                \'type\' => Literal::class,
+                \'options\' => [
+                    \'route\' => \'/register\',
+                    \'defaults\' => [
+                        \'controller\' => Controller\RegisterController::class,
+                        \'action\' => \'index\',
+                    ],
+                ],
+            ],
+            \'login\' => [
+                \'type\' => Segment::class,
+                \'options\' => [
+                    \'route\' => \'/login[/:action]\',
+                    \'defaults\' => [
+                        \'controller\' => Controller\LoginController::class,
+                        \'action\' => \'index\',
+                    ],
+                ],
+            ],
+',
+                'controllers/factories' =>
+'
+            Controller\RegisterController::class => function($sm) {
+                return new Controller\RegisterController(
+                    $sm->get(Model\UsersTable::class),
+                    $sm->get(\Utils\Security\Authentication::class),
+                    $sm->get(\Utils\Security\Helper::class)
+                );
+            },
+            Controller\LoginController::class => function($sm) {
+                return new Controller\LoginController(
+                    $sm->get(\Utils\Security\Authentication::class)
+                );
+            },
+'
+            ]
+        ], $section2, $moduleName, 'module');
+        
         if ($this->isJsonMode()) {
             $code = (json_encode([
-                'module.config.php' => 
-'\'register\' => [
-    \'type\' => Literal::class,
-    \'options\' => [
-        \'route\' => \'/register\',
-        \'defaults\' => [
-            \'controller\' => Controller\RegisterController::class,
-            \'action\' => \'index\',
-        ],
-    ],
-],
-\'login\' => [
-    \'type\' => Segment::class,
-    \'options\' => [
-        \'route\' => \'/login[/:action]\',
-        \'defaults\' => [
-            \'controller\' => Controller\LoginController::class,
-            \'action\' => \'index\',
-        ],
-    ],
-],
-
-...
-
-Controller\RegisterController::class => function($sm) {
-    return new Controller\RegisterController(
-        $sm->get(Model\UsersTable::class),
-        $sm->get(\Utils\Security\Authentication::class),
-        $sm->get(\Utils\Security\Helper::class)
-    );
-},
-Controller\LoginController::class => function($sm) {
-    return new Controller\LoginController(
-        $sm->get(\Utils\Security\Authentication::class)
-    );
-},',
                 'Module.php' =>
 'use Laminas\Session;
     
@@ -171,21 +195,7 @@ public function bootstrapSession($e)
         }
         $chain->attach(\'session.validate\', array($validator, \'isValid\'));
     }
-}',
-                'global.php' => 
-'\'session\' => [
-    \'config\' => [
-        \'class\' => \Laminas\Session\Config\SessionConfig::class,
-        \'options\' => [
-            \'name\' => \'session_name\',
-        ],
-    ],
-    \'storage\' => \Laminas\Session\Storage\SessionArrayStorage::class,
-    \'validators\' => [
-        \Laminas\Session\Validator\RemoteAddr::class,
-        \Laminas\Session\Validator\HttpUserAgent::class,
-    ],
-],'
+}'
             ]));
             $section2->writeln($code);
         }

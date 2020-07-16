@@ -44,10 +44,10 @@ class AdminPanelCommand extends AbstractCommand
         $this->createSimplePHP($moduleName, 'ConfigProvider.php', $section2);
         $this->createSimplePHP($moduleName, 'Navigation/Service/AdminNavigationFactory.php', $section2);
         
-        $this->createStaticView($moduleName, 'layout/admin.phtml', $section2);
-        $this->createStaticView($moduleName, 'admin/admin/index.phtml', $section2);
-        $this->createStaticView($moduleName, 'admin/_shared/footer.phtml', $section2);
-        $this->createStaticView($moduleName, 'admin/_shared/menu.phtml', $section2);
+        $this->createStaticView($moduleName, 'AdminPanel/View', 'layout/admin.phtml', $section2);
+        $this->createStaticView($moduleName, 'AdminPanel/View', 'admin/admin/index.phtml', $section2);
+        $this->createStaticView($moduleName, 'AdminPanel/View', 'admin/_shared/footer.phtml', $section2);
+        $this->createStaticView($moduleName, 'AdminPanel/View', 'admin/_shared/menu.phtml', $section2);
         
         $this->createStaticController($moduleName, 'AdminPanel/Controller', 'AbstractController.php', $section2);
         $this->createStaticController($moduleName, 'AdminPanel/Controller', 'AdminController.php', $section2);
@@ -61,25 +61,22 @@ class AdminPanelCommand extends AbstractCommand
         $this->createUserController($moduleName, $section2);
         $this->createUserView($moduleName, $section2);*/
         
-        if ($this->isJsonMode()) {
-            $code = (json_encode([
-                'global.php' => 
-'\'session\' => [
-    \'config\' => [
-        \'class\' => \Laminas\Session\Config\SessionConfig::class,
-        \'options\' => [
-            \'name\' => \'session_name\',
+        $this->injectConfigCodes([
+            'autoload/global.php' => [
+                'session' => 
+'\'config\' => [
+            \'class\' => \Laminas\Session\Config\SessionConfig::class,
+            \'options\' => [
+                \'name\' => \'session_name\',
+            ],
         ],
-    ],
-    \'storage\' => \Laminas\Session\Storage\SessionArrayStorage::class,
-    \'validators\' => [
-        \Laminas\Session\Validator\RemoteAddr::class,
-        \Laminas\Session\Validator\HttpUserAgent::class,
-    ],
-],'
-            ]));
-            $section2->writeln($code);
-        }
+        \'storage\' => \Laminas\Session\Storage\SessionArrayStorage::class,
+        \'validators\' => [
+            \Laminas\Session\Validator\RemoteAddr::class,
+            \Laminas\Session\Validator\HttpUserAgent::class,
+        ],'
+            ],
+        ], $section2, $moduleName, 'main');
 
 
         $section2->writeln('Done creating Admin Panel.');

@@ -43,42 +43,30 @@ class MariaDbCommand extends AbstractCommand
         $host = ucfirst(rtrim($input->getArgument('db_host'), 's'));
         $name = ucfirst(rtrim($input->getArgument('db_name'), 's'));
         
-        $code = (json_encode([
-                'global.php' => 
-'...
-
-\'db\' => array(
-    \'driver\' => \'Pdo\',
-    \'dsn\' => \'mysql:dbname='.$name.';host='.$host.'\',
-    \'driver_options\' => [
-        1002 => \'SET NAMES \\\'UTF8\\\'\',
-    ],
-),
-
-...
-
-\'service_manager\' => [
-    \'factories\' => [
-        ...
-        
-        \'Laminas\\Db\\Adapter\\Adapter\' => \'Laminas\\Db\\Adapter\\AdapterServiceFactory\',
-        \'Laminas\Db\TableGateway\TableGateway\' => \'Laminas\Db\TableGateway\TableGatewayServiceFactory\',
-    ],
-],
-
-...',
-            'local.php' => 
-'...
-
-\'db\' => array(
-    \'username\' => \'\',
-    \'password\' => \'\',
-),
-
-...'
-        ]));
-        
-        $section2->writeln($code);
+        $this->injectConfigCodes([
+            'autoload/global.php' => [
+                'db' => 
+'
+        \'driver\' => \'Pdo\',
+        \'dsn\' => \'mysql:dbname='.$name.';host='.$host.'\',
+        \'driver_options\' => [
+            1002 => \'SET NAMES \\\'UTF8\\\'\',
+        ],
+',
+                'service_manager/factories' =>
+' 
+            \'Laminas\\Db\\Adapter\\Adapter\' => \'Laminas\\Db\\Adapter\\AdapterServiceFactory\',
+            \'Laminas\Db\TableGateway\TableGateway\' => \'Laminas\Db\TableGateway\TableGatewayServiceFactory\',
+'
+            ],
+            'autoload/local.php' => [
+                'db' =>
+'
+        \'username\' => \'\',
+        \'password\' => \'\',
+'                
+            ],
+        ], $section2, null, 'main');
         
         $section2->writeln('Done creating a datbase connection.');
         
