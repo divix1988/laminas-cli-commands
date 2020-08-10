@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": "^7.1",
-        "laminas/laminas-cli": "^1.0"
+        "laminas/laminas-cli": "^0.1.4"
     },
     "autoload": {
         "psr-4": {
