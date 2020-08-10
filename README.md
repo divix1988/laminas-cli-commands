@@ -49,7 +49,7 @@ $ "vendor/bin/laminas.bat" [command-params] [command-name]
 ### Controller
 Generate sample controller with a list of available actions:
 ```bash
-"vendor/bin/laminas-cli.bat" mvc:controller --actions=<action1> --actions=<action2> --module=ModuleName <name>
+"vendor/bin/laminas.bat" mvc:controller --actions=<action1> --actions=<action2> --module=ModuleName <name>
 ```
 New file in: `[root]/module/[moduleName]/src/Controller/[name].php`
 
