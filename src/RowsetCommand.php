@@ -77,9 +77,11 @@ return $this;'
                 );
                 
                 $exchangeArrayBody .= '$this->'.$property.' = (!empty($row[\''.$property.'\'])) ? $row[\''.$property.'\'] : null;'.PHP_EOL;
-                $getArrayCopyBody .= '\''.$property.'\' => $this->get'. ucfirst($property).'(),'.PHP_EOL;
+                $getArrayCopyBody .= '    \''.$property.'\' => $this->get'. ucfirst($property).'(),'.PHP_EOL;
             }
         }
+        
+        $getArrayCopyBody = rtrim($getArrayCopyBody, PHP_EOL);
         
         $rowset
             ->addMethod(
@@ -109,7 +111,7 @@ return $this;'
 'throw new DomainException(\'This class does not support adding of extra input filters\');'
             );
         
-        $this->createAbstractRowset($moduleName);
+        $this->createAbstractRowset($moduleName, $section2);
         
         if ($this->isJsonMode()) {
             $code = (json_encode([$name.'.php' => $rowset->generate()]));
@@ -124,11 +126,17 @@ return $this;'
         return 0;
     }
     
-    protected function createAbstractRowset($moduleName)
+    protected function createAbstractRowset($moduleName, $section2)
     {
         $abstractContents = file_get_contents(__DIR__.'/Templates/AbstractModel.php');
         
         $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
+        
+        if ($this->isJsonMode()) {
+            $abstractContents = str_replace("<?php", '', $abstractContents);
+            $code = (json_encode(['AbstractModel.php' => $abstractContents]));
+            $section2->writeln($code);
+        }
         
         $this->storeRowsetContents('AbstractModel.php', $moduleName, $abstractContents);
     }
