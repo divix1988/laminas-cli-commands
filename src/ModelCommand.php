@@ -47,7 +47,7 @@ class ModelCommand extends AbstractCommand
         $name = ucfirst($input->getArgument('name'));
         $exploded = explode('Table', $name);
         $rowsetName = rtrim($exploded[0], 's');
-        $properties = $input->getOption('properties');
+        $properties = $this->getPropertiesArray($input);
         $generatedGetByFilters = '';
         $generatedPatchFilters = '';
         

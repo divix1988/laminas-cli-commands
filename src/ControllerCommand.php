@@ -42,7 +42,7 @@ class ControllerCommand extends AbstractCommand
         $moduleName = $this->getModuleName($input, $output, 'controller');
         
         $name = str_replace(' ', '', ucfirst($input->getArgument('name'))) . 'Controller';
-        $actions = $input->getOption('actions');
+        $actions = $this->getPropertiesArray($input, 'actions');
         
         $controller = $this->getControllerObject($name, $moduleName, $actions);
         $code = str_replace("\n", '%new_line%', $controller->generate());

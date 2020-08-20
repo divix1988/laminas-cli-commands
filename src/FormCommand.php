@@ -43,7 +43,7 @@ class FormCommand extends AbstractCommand
         $moduleName = $this->getModuleName($input, $output, 'form');
         
         $name = ucfirst(rtrim($input->getArgument('name'), 's')).'Form';
-        $properties = $input->getOption('properties');
+        $properties = $this->getPropertiesArray($input);
         
         $form = new ClassGenerator();
         $form->setName($name)

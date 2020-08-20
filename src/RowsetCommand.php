@@ -43,7 +43,7 @@ class RowsetCommand extends AbstractCommand
         $moduleName = $this->getModuleName($input, $output, 'rowset');
         
         $name = ucfirst($input->getArgument('name'));
-        $properties = $input->getOption('properties');
+        $properties = $this->getPropertiesArray($input);
         
         $rowset = new ClassGenerator();
         $rowset->setName($name)

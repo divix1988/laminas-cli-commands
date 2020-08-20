@@ -43,7 +43,7 @@ class CrudCommand extends AbstractCommand
         $this->createAbstractModel($moduleName);
         
         $name = ucfirst($input->getArgument('name'));
-        $properties = $input->getOption('properties');
+        $properties = $this->getPropertiesArray($input);
         $generatedGetByFilters = '';
         $generatedPatchFilters = '';
         
