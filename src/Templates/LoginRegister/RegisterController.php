@@ -44,8 +44,9 @@ class RegisterController extends AbstractController {
                 //store to database
                 $userId = $this->usersModel->save($rowset);
                 $rowset->setId($userId);
+                $rowset->setRole('user');
                 //user logging
-                $this->securityAuth->authenticate(
+                $this->securityAuth->auth(
                     $rowset->getEmail(),
                     $formData[$form::FIELDSET_LOGIN][Form\UserLoginFieldset::ELEMENT_PASSWORD]
                 );
@@ -56,7 +57,7 @@ class RegisterController extends AbstractController {
                     $sessionUser = new Session\Container('user');
                     $sessionUser->details = $rowset;
                     
-                    return $this->redirect()->toRoute('login', ['action' => 'progressuser']);
+                    return $this->redirect()->toUrl('login/progressuser');
                 } else {
                     throw new \Exception('Something went wrong.. Check if the user has been added to the database correctly');
                 }
