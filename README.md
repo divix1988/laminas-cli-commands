@@ -25,7 +25,6 @@ Add the following config into your `config/local.php` file:
         'mvc:crud' => \Divix\Laminas\Cli\Command\CrudCommand::class,
         'mvc:crud_controller' => \Divix\Laminas\Cli\Command\CrudControllerCommand::class,
         'mvc:crud_view' => \Divix\Laminas\Cli\Command\CrudViewCommand::class,
-        'mvc:crud_model' => \Divix\Laminas\Cli\Command\CrudModelCommand::class,
         'mvc:crud_config' => \Divix\Laminas\Cli\Command\CrudConfigCommand::class,
         'mvc:login_registration' => \Divix\Laminas\Cli\Command\LoginRegistrationCommand::class,
         'mvc:admin' => \Divix\Laminas\Cli\Command\AdminPanelCommand::class,
