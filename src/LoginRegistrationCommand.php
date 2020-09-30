@@ -65,6 +65,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->generateRowset($moduleName, 'User', $output, $properties);
         $section1->writeln('End creating new Rowset.');
 
+        $this->createStaticController($moduleName, 'AdminPanel/Controller', 'AbstractController.php', $section2);
         $this->createRegisterController($moduleName, $section2);
         $this->createRegisterView($moduleName, $properties, $section2);
         $this->createHydrator($moduleName, $section2);
