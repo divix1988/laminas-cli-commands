@@ -30,6 +30,7 @@ Add the following config into your `config/local.php` file:
         'mvc:admin' => \Divix\Laminas\Cli\Command\AdminPanelCommand::class,
         'mvc:navigation' => \Divix\Laminas\Cli\Command\NavigationCommand::class,
         'mvc:sitemap' => \Divix\Laminas\Cli\Command\SitemapCommand::class,
+        'mvc:mariadb_database_connect' => \Divix\Laminas\Cli\Command\MariaDbCommand::class
     ],
 ],
 ```
