@@ -413,8 +413,18 @@ class AbstractCommand extends Command
         }
         
         if (strpos($noSpacesContents, preg_replace('/\s+/', '', $sectionNameString)) > 0) {
+            //get current contents
+            preg_match('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $fileContents, $matches);
+            $newContents = str_replace($sectionNameString."[", '', $newContents);
+            
+            //remove last closing bracket for current section
+            $matches[0] = trim(preg_replace("~\]\s*(.*)$~", '', $matches[0]));
+            
             //section already exists
-            $output = preg_replace('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $newContents, $fileContents);
+            $output = preg_replace('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $matches[0].$newContents, $fileContents);
+            if (count($sectionNames) > 1) {
+                //exit($output);
+            }
         } else {
             //section is missing in root
             $newContents = '    '.$newContents;
@@ -440,7 +450,7 @@ class AbstractCommand extends Command
             }
         }
         
-        $output = str_replace(',,', ',', $output);
+        $output = preg_replace('/,+/', ',', $output);
         
         //echo PHP_EOL.'output: '.PHP_EOL.$output;
         file_put_contents($filePath, $output);
