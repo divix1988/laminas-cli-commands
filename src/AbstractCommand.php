@@ -406,7 +406,7 @@ class AbstractCommand extends Command
                 $numberOfSpaces = $sectionNamesLength * 4;
                 $spaces = str_repeat(' ', $numberOfSpaces);
 
-                $newContents = rtrim("'".$tempSectionName."' => [".PHP_EOL.$spaces.'    '.$newContents.PHP_EOL.$spaces.'],', ',');
+                $newContents = "'".$tempSectionName."' => [".PHP_EOL.$spaces.'    '.$newContents.PHP_EOL.$spaces.'],';
 
                 $sectionNamesLength--;
             }
@@ -421,7 +421,7 @@ class AbstractCommand extends Command
             
             if (count($sectionNames) === 1) {
                 //find last ] char and replace it with new section
-                $output = preg_replace("~\]\s*(.*)$~", $newContents.PHP_EOL.']', $fileContents);
+                $output = preg_replace("~\];\s*(.*)$~", $newContents.PHP_EOL.'];', $fileContents);
             } else {
                 //section is missing in nested level ONLY 2nd level is supported ATM
                 // @TODO
@@ -434,11 +434,13 @@ class AbstractCommand extends Command
                     } else {
                         //parent is missing
                         //find last ] char in section and append new code
-                        $output = preg_replace("~\]\s*(.*)$~", $newContents.PHP_EOL.']', $fileContents);
+                        $output = preg_replace("~\];\s*(.*)$~", $newContents.PHP_EOL.'];', $fileContents);
                     }
                 }
             }
         }
+        
+        $output = str_replace(',,', ',', $output);
         
         //echo PHP_EOL.'output: '.PHP_EOL.$output;
         file_put_contents($filePath, $output);
