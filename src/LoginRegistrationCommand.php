@@ -66,6 +66,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $section1->writeln('End creating new Rowset.');
 
         $this->createStaticController($moduleName, 'AdminPanel/Controller', 'AbstractController.php', $section2);
+        $this->createStaticUtils($moduleName, 'LoginRegister/Utils', 'TableGateway.php', $section2);
         $this->createRegisterController($moduleName, $section2);
         $this->createRegisterView($moduleName, $properties, $section2);
         $this->createHydrator($moduleName, $section2);
@@ -83,7 +84,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->injectConfigCodes([
             'autoload/global.php' => [
                 'session' => 
-'\'config\' => [
+        '\'config\' => [
             \'class\' => \Laminas\Session\Config\SessionConfig::class,
             \'options\' => [
                 \'name\' => \'session_name\',
@@ -95,7 +96,7 @@ class LoginRegistrationCommand extends AbstractCommand
             \Laminas\Session\Validator\HttpUserAgent::class,
         ]'
             ],
-        ], $section2, $moduleName, 'main');
+        ], $section2, $moduleName, 'main'); exit();
         
         $this->injectConfigCodes([
             'module.config.php' => [
@@ -122,6 +123,7 @@ class LoginRegistrationCommand extends AbstractCommand
                 ],
             ],
 ',
+
                 'controllers/factories' =>
 '
             Controller\RegisterController::class => function($sm) {
@@ -136,6 +138,26 @@ class LoginRegistrationCommand extends AbstractCommand
                     $sm->get(\Utils\Security\Authentication::class)
                 );
             },
+',
+             'service_manager/Factories' =>
+'
+        \'UsersTableGateway\' => function ($sm) {
+            $dbAdapter = $sm->get(\'Laminas\Db\Adapter\Adapter\');
+            $resultSetPrototype = new ResultSet();
+            //get base url from config
+            $config = $sm->get(\'Config\');
+            $baseUrl = $config[\'view_manager\'][\'base_url\'];
+
+            //pass base url via cnstructor to the User class
+            $resultSetPrototype->setArrayObjectPrototype(new User($baseUrl));
+            return new TableGateway(\'users\', $dbAdapter, null, $resultSetPrototype);
+        },
+        \'Application\Model\UsersTable\' => function($sm) {
+            $tableGateway = $sm->get(\'UsersTableGateway\');
+            $table = new UsersTable($tableGateway);
+
+            return $table;
+        },
 '
             ]
         ], $section2, $moduleName, 'module');

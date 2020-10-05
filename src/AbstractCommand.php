@@ -18,6 +18,7 @@ class AbstractCommand extends Command
 {
     const MODULE_SRC = __DIR__.'/../../../../module/';
     const MODULE_CONTROLLER_SRC = '/src/Controller/';
+    const MODULE_UTILS_SRC = '/src/Utils/';
     const MODULE_MODEL_SRC = '/src/Model/';
     const MODULE_FORM_SRC = '/src/Form/';
     const MODULE_FILE_SRC = '/src/Module.php';
@@ -119,6 +120,17 @@ class AbstractCommand extends Command
             return;
         }
         $dir = self::MODULE_SRC.$moduleName.self::MODULE_CONTROLLER_SRC;
+        
+        $this->createFoldersForDir($dir);
+        file_put_contents($dir.$fileName, $contents);
+    }
+    
+    protected function storeUtilsContents($fileName, $moduleName, $contents): void
+    {
+        if ($this->isJsonMode()) {
+            return;
+        }
+        $dir = self::MODULE_SRC.$moduleName.self::MODULE_UTILS_SRC;
         
         $this->createFoldersForDir($dir);
         file_put_contents($dir.$fileName, $contents);
@@ -295,6 +307,24 @@ class AbstractCommand extends Command
         $this->storeControllerContents($newName, $moduleName, $abstractContents);
     }
     
+    protected function createStaticUtils($moduleName, $folder, $filename, $section2, $newName = null)
+    {
+        $abstractContents = file_get_contents(__DIR__.'/Templates/'.$folder.'/'.$filename);
+        $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
+        
+        if (!isset($newName)) {
+            $newName = $filename;
+        }
+        
+        if ($this->isJsonMode()) {
+            $abstractContents = str_replace("<?php", '', $abstractContents);
+            $code = (json_encode([$newName => $abstractContents]));
+            $section2->writeln($code);
+        }
+        
+        $this->storeUtilsContents($newName, $moduleName, $abstractContents);
+    }
+    
     protected function createStaticConfig($moduleName, $filename, $section2)
     {
         $abstractContents = file_get_contents(__DIR__.'/Templates/AdminPanel/'.$filename);
@@ -398,7 +428,7 @@ class AbstractCommand extends Command
         if (strpos($newContents, $firstSectionNameString) !== 0 && strpos($noSpacesNewContents, $lastSectionNameString) !== 0) {
             $sectionNamesReversed = array_reverse($sectionNames);
             $sectionNamesLength = count($sectionNames);
-            //injected contents don't have section names include so append it
+            //injected contents don't have section names included so append it
             foreach ($sectionNamesReversed as $index => $tempSectionName) {
                 if (count($sectionNames) > 1 && $index == 1 && strpos($noSpacesContents, preg_replace('/\s+/', '', $tempSectionName)) !== false) {
                     continue;
@@ -420,10 +450,19 @@ class AbstractCommand extends Command
             //remove last closing bracket for current section
             $matches[0] = trim(preg_replace("~\]\s*(.*)$~", '', $matches[0]));
             
-            //section already exists
-            $output = preg_replace('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $matches[0].$newContents, $fileContents);
-            if (count($sectionNames) > 1) {
-                //exit($output);
+            //check if first section from new contents exists, if so, then don't update file
+            
+            //get first section name from potential new contents:
+            preg_match("/'([a-z]*)'/", $newContents, $newContentsFirstSection);
+            
+            preg_match('/('.$newContentsFirstSection[0].' =>)/', $matches[0], $foundNestedSection);
+            
+            //section already exists, but update only then when section from new contents is missing
+            if (empty($foundNestedSection[0])) {
+                $output = preg_replace('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $matches[0].$newContents, $fileContents);
+            } else {
+                //@TODO do a support for checking each of the 2nd level section
+                $output = $fileContents;
             }
         } else {
             //section is missing in root
