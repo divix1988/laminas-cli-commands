@@ -58,7 +58,7 @@ class LoginRegistrationCommand extends AbstractCommand
         }
         
         $section1->writeln('Start creating new Model.');
-        $this->generateModel($moduleName, 'User', $output, $properties);
+        $this->generateModel($moduleName, 'Users', $output, $properties);
         $section1->writeln('End creating new Model.');
         
         $section1->writeln('Start creating new Rowset.');
@@ -67,6 +67,9 @@ class LoginRegistrationCommand extends AbstractCommand
 
         $this->createStaticController($moduleName, 'AdminPanel/Controller', 'AbstractController.php', $section2);
         $this->createStaticUtils($moduleName, 'LoginRegister/Utils', 'TableGateway.php', $section2);
+        $this->createStaticUtils($moduleName, 'LoginRegister/Utils', 'Adapter.php', $section2);
+        $this->createStaticUtils($moduleName, 'LoginRegister/Utils', 'Authentication.php', $section2);
+        $this->createStaticUtils($moduleName, 'LoginRegister/Utils', 'Helper.php', $section2);
         $this->createRegisterController($moduleName, $section2);
         $this->createRegisterView($moduleName, $properties, $section2);
         $this->createHydrator($moduleName, $section2);
@@ -74,6 +77,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->createStaticForm($moduleName, 'UserLoginForm', $section2);
         $this->createStaticForm($moduleName, 'UsernameFieldset', $section2);
         $this->createUserRegisterForm($moduleName, $properties, $section2);
+        $this->createStaticCss($moduleName, 'LoginRegister/public/css', 'login-register.css', $section2);
         
         
         $this->createLoginController($moduleName, $section2);
@@ -96,7 +100,7 @@ class LoginRegistrationCommand extends AbstractCommand
             \Laminas\Session\Validator\HttpUserAgent::class,
         ]'
             ],
-        ], $section2, $moduleName, 'main'); exit();
+        ], $section2, $moduleName, 'main');
         
         $this->injectConfigCodes([
             'module.config.php' => [
@@ -129,35 +133,58 @@ class LoginRegistrationCommand extends AbstractCommand
             Controller\RegisterController::class => function($sm) {
                 return new Controller\RegisterController(
                     $sm->get(Model\UsersTable::class),
-                    $sm->get(\Utils\Security\Authentication::class),
-                    $sm->get(\Utils\Security\Helper::class)
+                    $sm->get(Utils\Authentication::class),
+                    $sm->get(Utils\Helper::class)
                 );
             },
             Controller\LoginController::class => function($sm) {
                 return new Controller\LoginController(
-                    $sm->get(\Utils\Security\Authentication::class)
+                    $sm->get(Utils\Authentication::class)
                 );
             },
 ',
-             'service_manager/Factories' =>
+             'service_manager/factories2' =>
 '
-        \'UsersTableGateway\' => function ($sm) {
-            $dbAdapter = $sm->get(\'Laminas\Db\Adapter\Adapter\');
-            $resultSetPrototype = new ResultSet();
-            //get base url from config
-            $config = $sm->get(\'Config\');
-            $baseUrl = $config[\'view_manager\'][\'base_url\'];
-
-            //pass base url via cnstructor to the User class
-            $resultSetPrototype->setArrayObjectPrototype(new User($baseUrl));
-            return new TableGateway(\'users\', $dbAdapter, null, $resultSetPrototype);
-        },
-        \'Application\Model\UsersTable\' => function($sm) {
-            $tableGateway = $sm->get(\'UsersTableGateway\');
-            $table = new UsersTable($tableGateway);
-
-            return $table;
-        },
+            \'UsersTableGateway\' => function ($sm) {
+                $dbAdapter = $sm->get(\'Laminas\Db\Adapter\Adapter\');
+                $resultSetPrototype = new \Laminas\Db\ResultSet\ResultSet();
+                //get base url from config
+                $config = $sm->get(\'Config\');
+                $baseUrl = $config[\'view_manager\'][\'base_url\'];
+    
+                //pass base url via cnstructor to the User class
+                $resultSetPrototype->setArrayObjectPrototype(new Model\Rowset\User($baseUrl));
+                return new Utils\TableGateway(\'users\', $dbAdapter, null, $resultSetPrototype);
+            },
+            \'Application\Model\UsersTable\' => function($sm) {
+                $tableGateway = $sm->get(\'UsersTableGateway\');
+                $table = new Model\UsersTable($tableGateway);
+    
+                return $table;
+            },
+            Utils\Authentication::class => function($sm) {
+                $auth = new Utils\Authentication(
+                    $sm->get(\Laminas\Db\Adapter\Adapter::class),
+                    $sm->get(Utils\Adapter::class)    
+                );
+                return $auth;
+            },
+            Utils\Helper::class => InvokableFactory::class,
+            
+            SessionManager::class => function ($container) {
+                $config = $container->get(\'config\');
+                $session = $config[\'session\'];
+                $sessionConfig = new $session[\'config\'][\'class\']();
+                $sessionConfig->setOptions($session[\'config\'][\'options\']);
+                $sessionManager = new Session\SessionManager(
+                    $sessionConfig,
+                    new $session[\'storage\'](),
+                    null
+                );
+                \Laminas\Session\Container::setDefaultManager($sessionManager);
+                
+                return $sessionManager;
+            },
 '
             ]
         ], $section2, $moduleName, 'module');
@@ -303,7 +330,7 @@ public function bootstrapSession($e)
             $section2->writeln($code);
         }
         
-        $this->storeViewContents('index.phtml', $moduleName, 'register', $abstractContents);
+        $this->storeHydratorContents('index.phtml', $moduleName, $abstractContents);
     }
     
     protected function createStaticForm($moduleName, $filename, $section2)
@@ -360,7 +387,7 @@ public function bootstrapSession($e)
             $section2->writeln($code);
         }
         
-        $this->storeViewContents('index.phtml', $moduleName, 'register', $abstractContents);
+        $this->storeViewContents('index.phtml', $moduleName, 'user', $abstractContents);
     }
     
     protected function createLoginView($moduleName, $section2)

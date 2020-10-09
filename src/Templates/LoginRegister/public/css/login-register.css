@@ -1,0 +1,80 @@
+.btn-success {
+    background-color: #57a900;
+    background-image: -moz-linear-gradient(top, #70d900, #57a900);
+    background-image: -ms-linear-gradient(top, #70d900, #57a900);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#70d900), to(#57a900));
+    background-image: -webkit-linear-gradient(top, #70d900, #57a900);
+    background-image: -o-linear-gradient(top, #70d900, #57a900);
+    background-image: linear-gradient(top, #70d900, #57a900);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#70d900', endColorstr='#57a900', GradientType=0);
+}
+
+.btn-success:hover,
+.btn-success:active,
+.btn-success.active,
+.btn-success.disabled,
+.btn-success[disabled] {
+    background-color: #57a900;
+}
+
+div.container a.navbar-brand > img {
+    display: inline;
+    margin-right: 4px;
+    margin-top: -2px;
+}
+
+form#user label {
+    display: block;
+}
+form#user label span {
+    width: 130px;
+    display: inline-block;
+    margin: 5px 0;
+}
+
+.comicsList img {
+    width: 75px;
+    margin: 4px 0 11px 10px;
+}
+.comicsList th {
+    width: 75px;
+}
+.paginationControl {
+    margin-top: 22px;
+    font-size: 17px;
+}
+.paginationControl select {
+    padding: 10px;
+}
+
+.pollsContainer label {
+    display: block;
+}
+.pollsContainer form {
+    border: 1px solid #9d9d9d;
+    padding: 7px;
+    border-radius: 4px;
+    width: 300px;
+}
+
+form.styledForm > label {
+    display: block;
+}
+form.styledForm > label > span {
+    width: 130px;
+    display: inline-block;
+    margin: 5px 0;
+}
+.articlesMenu li {
+    display: block;
+    width: 100%;
+}
+
+.error-page {padding: 40px 15px;text-align: center;}
+.error-actions {margin-top:15px;margin-bottom:15px;}
+.error-actions .btn { margin-right:10px; }
+h1.error404 { font-size :100px !important; }
+
+.breadcrumb > a {
+    padding: 0 5px;
+}

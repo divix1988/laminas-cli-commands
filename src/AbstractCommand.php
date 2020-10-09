@@ -21,9 +21,11 @@ class AbstractCommand extends Command
     const MODULE_UTILS_SRC = '/src/Utils/';
     const MODULE_MODEL_SRC = '/src/Model/';
     const MODULE_FORM_SRC = '/src/Form/';
+    const MODULE_HYDRATOR_SRC = '/src/Hydrator/';
     const MODULE_FILE_SRC = '/src/Module.php';
     const MODULE_CONFIG_SRC = '/config/';
     const MODULE_ROWSET_SRC = '/src/Model/Rowset/';
+    const MODULE_CSS_SRC = __DIR__.'/../../../../public/css/';
     
     protected $input;
     protected $registerOtherCommands = false;
@@ -136,6 +138,17 @@ class AbstractCommand extends Command
         file_put_contents($dir.$fileName, $contents);
     }
     
+    protected function storeCssContents($fileName, $moduleName, $contents): void
+    {
+        if ($this->isJsonMode()) {
+            return;
+        }
+        $dir = self::MODULE_CSS_SRC;
+        
+        $this->createFoldersForDir($dir);
+        file_put_contents($dir.$fileName, $contents);
+    }
+    
     protected function storeModelContents($fileName, $moduleName, $contents = null, $templateFile = null): void
     {
         if ($this->isJsonMode()) {
@@ -173,6 +186,17 @@ class AbstractCommand extends Command
         file_put_contents($dir.$fileName, $contents);
     }
     
+    protected function storeHydratorContents($fileName, $moduleName, $contents): void
+    {
+        if ($this->isJsonMode()) {
+            return;
+        }
+        $dir = self::MODULE_SRC.$moduleName.self::MODULE_HYDRATOR_SRC;
+
+        $this->createFoldersForDir($dir); 
+        file_put_contents($dir.$fileName, $contents);
+    }
+    
     protected function storeConfigContents($fileName, $moduleName, $contents): void
     {
         if ($this->isJsonMode()) {
@@ -190,7 +214,7 @@ class AbstractCommand extends Command
             return;
         }
         $moduleName = strtolower($moduleName);
-        $dir = self::MODULE_SRC.$moduleName.'/view/'.$controllerName.'/';
+        $dir = self::MODULE_SRC.$moduleName.'/view/'.$moduleName.'/'.$controllerName.'/';
         
         $this->createFoldersForDir($dir);
         file_put_contents($dir.$fileName, $contents);
@@ -325,6 +349,18 @@ class AbstractCommand extends Command
         $this->storeUtilsContents($newName, $moduleName, $abstractContents);
     }
     
+    protected function createStaticCss($moduleName, $folder, $filename, $section2)
+    {
+        $abstractContents = file_get_contents(__DIR__.'/Templates/'.$folder.'/'.$filename);
+        
+        if ($this->isJsonMode()) {
+            $code = (json_encode([$newName => $abstractContents]));
+            $section2->writeln($code);
+        }
+        
+        $this->storeCssContents($filename, $moduleName, $abstractContents);
+    }
+    
     protected function createStaticConfig($moduleName, $filename, $section2)
     {
         $abstractContents = file_get_contents(__DIR__.'/Templates/AdminPanel/'.$filename);
@@ -455,7 +491,11 @@ class AbstractCommand extends Command
             //get first section name from potential new contents:
             preg_match("/'([a-z]*)'/", $newContents, $newContentsFirstSection);
             
-            preg_match('/('.$newContentsFirstSection[0].' =>)/', $matches[0], $foundNestedSection);
+            $foundNestedSection = [];
+            
+            if (!empty($newContentsFirstSection[0]) && !empty($matches[0])) {
+                preg_match('/('.$newContentsFirstSection[0].' =>)/', $matches[0], $foundNestedSection);
+            }
             
             //section already exists, but update only then when section from new contents is missing
             if (empty($foundNestedSection[0])) {
