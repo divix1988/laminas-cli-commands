@@ -1,6 +1,7 @@
 # laminas-cli-commands
 
-CLI Commands for Laminas projects
+CLI Commands for Laminas projects.
+*WARNING, STILL IN BETA.*
 
 ## Installation
 
