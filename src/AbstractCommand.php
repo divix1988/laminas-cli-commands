@@ -442,7 +442,7 @@ class AbstractCommand extends Command
         }
     }
     
-    protected function updateConfigFile($filename, $sectionName, $newContents, $moduleName, $configType = 'main')
+    protected function updateConfigFile($filename, $sectionName, $newContentContainer, $moduleName, $configType = 'main')
     {
         if ($configType === 'main') {
             $filePath = APPLICATION_PATH.'\config\\'.$filename;
@@ -453,11 +453,32 @@ class AbstractCommand extends Command
         } else {
             throw new Exception('invalid configType');
         }
+        
+        if (is_array($newContentContainer) && !isset($newContentContainer['contents'])) {
+            throw new Exception('invalid new contents configuration');
+        }
+        $newContents = $newContentContainer;
+        $identifier = null;
+        
+        if (is_array($newContentContainer)) {
+            $newContents = $newContentContainer['contents'];
+            
+            //check if idenfier was passed to detect when adding contents to avoid duplication
+            if (isset($newContentContainer['identifier'])) {
+                $identifier = str_replace('\\', '\\\\', $newContentContainer['identifier']);
+                $identifier = str_replace(':', '\:', $identifier);
+            }
+        }
+        
         $sectionNames = explode('/', $sectionName);
         $firstSectionNameString = "'".reset($sectionNames)."' => ";
         $lastSectionNameString = "'".end($sectionNames)."'";
         
         $sectionNameString = "'".end($sectionNames)."' => ";
+        
+        if (count($sectionNames) == 2) {
+            $sectionNameString = $firstSectionNameString.$sectionNameString;
+        }
         $noSpacesContents = preg_replace('/\s+/', '', $fileContents);
         $noSpacesNewContents = preg_replace('/\s+/', '', $newContents);
         
@@ -485,8 +506,7 @@ class AbstractCommand extends Command
             
             //remove last closing bracket for current section
             $matches[0] = trim(preg_replace("~\]\s*(.*)$~", '', $matches[0]));
-            
-            //check if first section from new contents exists, if so, then don't update file
+
             
             //get first section name from potential new contents:
             preg_match("/'([a-z]*)'/", $newContents, $newContentsFirstSection);
@@ -499,7 +519,14 @@ class AbstractCommand extends Command
             
             //section already exists, but update only then when section from new contents is missing
             if (empty($foundNestedSection[0])) {
-                $output = preg_replace('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $matches[0].$newContents, $fileContents);
+                if (
+                    $identifier == null ||
+                    !preg_match('/('.$identifier.')/',  $matches[0])
+                ) {
+                    $output = preg_replace('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $matches[0].$newContents, $fileContents);
+                } else {
+                    $output = $fileContents;
+                }
             } else {
                 //@TODO do a support for checking each of the 2nd level section
                 $output = $fileContents;
@@ -516,13 +543,14 @@ class AbstractCommand extends Command
                 // @TODO
                 if (count($sectionNames) === 2) {
                     $parentSectionName = $sectionNames[0];
+                    //add parent to new contents:
+                    $newContents = $firstSectionNameString.' ['.PHP_EOL.'    '.$newContents.PHP_EOL.'    ],';
                     
                     if (strpos($noSpacesContents, preg_replace('/\s+/', '', $parentSectionName)) > 0) {
                         //parent exists
                         $output = preg_replace('/(\''.$parentSectionName.'\' => )(\[((?>[^\[\]]++|(?2))*)\])/', $newContents, $fileContents);
                     } else {
                         //parent is missing
-                        //find last ] char in section and append new code
                         $output = preg_replace("~\];\s*(.*)$~", $newContents.PHP_EOL.'];', $fileContents);
                     }
                 }

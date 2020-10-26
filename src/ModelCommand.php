@@ -142,7 +142,7 @@ $this->tableGateway->update($passedData, [\'id\' => $id]);'
         //add save()
         $model->addMethod(
             'save',
-            [['name' => 'rowset', 'type' => '\ModuleName\Model\Rowset\\'.$rowsetName]],
+            [['name' => 'rowset', 'type' => '\\'.$moduleName.'\Model\Rowset\\'.$rowsetName]],
             MethodGenerator::FLAG_PUBLIC,
                 'return parent::saveRow($rowset);'
         );

@@ -11,6 +11,8 @@ class UserRegisterForm extends \Laminas\Form\Form implements \Laminas\InputFilte
     const ELEMENT_CAPTCHA = 'captcha';
     const FIELDSET_USERNAME = 'user_username';
     const FIELDSET_LOGIN = 'user_login';
+    
+%constants%
 
     public function __construct($name = 'register_user', $params)
     {
@@ -38,7 +40,7 @@ class UserRegisterForm extends \Laminas\Form\Form implements \Laminas\InputFilte
             ],
         ]);
         
-        %properties%
+%properties%
 
         /*$this->add([
             'name' => self::ELEMENT_CAPTCHA,

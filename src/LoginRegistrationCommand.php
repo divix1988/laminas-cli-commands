@@ -128,7 +128,9 @@ class LoginRegistrationCommand extends AbstractCommand
             ],
 ',
 
-                'controllers/factories' =>
+                'controllers/factories' => [
+                    'identifier' => 'Controller\RegisterController::class',
+                    'contents' =>
 '
             Controller\RegisterController::class => function($sm) {
                 return new Controller\RegisterController(
@@ -142,8 +144,11 @@ class LoginRegistrationCommand extends AbstractCommand
                     $sm->get(Utils\Authentication::class)
                 );
             },
-',
-             'service_manager/factories2' =>
+'
+            ],
+             'service_manager/factories' => [
+                'identifier' => 'SessionManager::class',
+                    'contents' =>
 '
             \'UsersTableGateway\' => function ($sm) {
                 $dbAdapter = $sm->get(\'Laminas\Db\Adapter\Adapter\');
@@ -186,6 +191,7 @@ class LoginRegistrationCommand extends AbstractCommand
                 return $sessionManager;
             },
 '
+            ]
             ]
         ], $section2, $moduleName, 'module');
         
@@ -330,7 +336,7 @@ public function bootstrapSession($e)
             $section2->writeln($code);
         }
         
-        $this->storeHydratorContents('index.phtml', $moduleName, $abstractContents);
+        $this->storeHydratorContents('UserFormHydrator.php', $moduleName, $abstractContents);
     }
     
     protected function createStaticForm($moduleName, $filename, $section2)
@@ -351,21 +357,26 @@ public function bootstrapSession($e)
         $abstractContents = file_get_contents(__DIR__.'/Templates/LoginRegister/Form/UserRegisterForm.php');
         $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
         
+        $constantsCode = '';
         $propertiesCode = '';
         
         foreach ($properties as $property) {
+            $constantsCode .=
+'   const ELEMENT_'.strtoupper($property).' = \''.$property.'\';'.PHP_EOL;
+
             $propertiesCode .= 
-'$this->add([
-    \'name\' => \''.$property.'\',
-    \'type\' => \'text\',
-    \'options\' => [
-        \'label\' => \''.ucfirst($property).'\'
-    ],
-    \'attributes\' => [
-        \'required\' => true
-    ]
-]);'.PHP_EOL;
+'       $this->add([
+            \'name\' => self::ELEMENT_'.strtoupper($property).',
+            \'type\' => \'text\',
+            \'options\' => [
+                \'label\' => \''.ucfirst($property).'\'
+            ],
+            \'attributes\' => [
+                \'required\' => true
+            ]
+        ]);'.PHP_EOL;
         }
+        $abstractContents = str_replace("%constants%", $constantsCode, $abstractContents);
         $abstractContents = str_replace("%properties%", $propertiesCode, $abstractContents);
         
         if ($this->isJsonMode()) {
