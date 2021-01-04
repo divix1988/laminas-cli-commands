@@ -85,6 +85,8 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->createUserController($moduleName, $section2);
         $this->createUserView($moduleName, $section2);
         
+        $this->createSql($moduleName, $properties, $section2);
+        
         $this->injectConfigCodes([
             'autoload/global.php' => [
                 'session' => 
@@ -104,7 +106,9 @@ class LoginRegistrationCommand extends AbstractCommand
         
         $this->injectConfigCodes([
             'module.config.php' => [
-                'router/routes' =>
+                'router/routes' => [
+                    'identifier' => "'register' => ",
+                    'contents' =>
 '
             \'register\' => [
                 \'type\' => Literal::class,
@@ -126,7 +130,8 @@ class LoginRegistrationCommand extends AbstractCommand
                     ],
                 ],
             ],
-',
+'
+            ],
 
                 'controllers/factories' => [
                     'identifier' => 'Controller\RegisterController::class',
@@ -315,6 +320,10 @@ public function bootstrapSession($e)
         foreach ($properties as $property) {
             $propertiesCode .= 
 '                            echo $this->formRow($userForm->get(\''.$property.'\'));'.PHP_EOL;
+            if ($property === 'password') {
+                $propertiesCode .=
+'                            echo $this->formRow($userForm->get(\'confirm_password\'));'.PHP_EOL;
+            }
         }
         $abstractContents = str_replace("%properties%", $propertiesCode, $abstractContents);
         
@@ -375,6 +384,20 @@ public function bootstrapSession($e)
                 \'required\' => true
             ]
         ]);'.PHP_EOL;
+            
+            if ($property === 'password') {
+                $propertiesCode .= 
+'       $this->add([
+            \'name\' => self::ELEMENT_PASSWORD_CONFIRM,
+            \'type\' => Element\Password::class,
+            \'options\' => [
+                \'label\' => \'Repeat password\',
+            ],
+            \'attributes\' => [
+                \'required\' => true
+            ],
+        ]);'.PHP_EOL;
+            }
         }
         $abstractContents = str_replace("%constants%", $constantsCode, $abstractContents);
         $abstractContents = str_replace("%properties%", $propertiesCode, $abstractContents);
@@ -411,5 +434,24 @@ public function bootstrapSession($e)
         }
         
         $this->storeViewContents('index.phtml', $moduleName, 'login', $abstractContents);
+    }
+    
+    protected function createSql($moduleName, $properties, $section2)
+    {
+        $contents = 'CREATE TABLE `users` (
+   `id` int(10) UNSIGNED NOT NULL,
+';
+        foreach ($properties as $property) {
+            $contents .= '    `'.$property.'` varchar(250) NOT NULL,'.PHP_EOL;
+        }
+        $contents = rtrim(trim($contents), ',').PHP_EOL;
+        $contents .= ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;';
+        
+        if ($this->isJsonMode()) {
+            $code = (json_encode(['sql/users.sql' => $contents]));
+            $section2->writeln($code);
+        }
+        
+        $this->storeSqlContents('users.sql', $moduleName, $contents);
     }
 }

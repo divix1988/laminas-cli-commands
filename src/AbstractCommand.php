@@ -220,6 +220,18 @@ class AbstractCommand extends Command
         file_put_contents($dir.$fileName, $contents);
     }
     
+    protected function storeSqlContents($fileName, $moduleName, $contents): void
+    {
+        if ($this->isJsonMode()) {
+            return;
+        }
+        $moduleName = strtolower($moduleName);
+        $dir = self::MODULE_SRC.$moduleName.'/sql/';
+        
+        $this->createFoldersForDir($dir);
+        file_put_contents($dir.$fileName, $contents);
+    }
+    
     protected function createFoldersForDir($dir): void
     {
         if ($this->isJsonMode()) {
@@ -467,6 +479,8 @@ class AbstractCommand extends Command
             if (isset($newContentContainer['identifier'])) {
                 $identifier = str_replace('\\', '\\\\', $newContentContainer['identifier']);
                 $identifier = str_replace(':', '\:', $identifier);
+                $identifier = str_replace('=', '\=', $identifier);
+                $identifier = str_replace('[', '\[', $identifier);
             }
         }
         

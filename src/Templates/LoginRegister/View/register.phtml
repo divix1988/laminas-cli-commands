@@ -10,13 +10,9 @@
                         <?php
                             $userForm->prepare();
                             echo $this->form()->openTag($userForm);
-                            echo $this->formRow($userForm->get('user_username')->get('username'));
-                            echo $this->formRow($userForm->get('user_login')->get('email'));
-                            echo $this->formRow($userForm->get('user_login')->get('password'));
-                            echo $this->formRow($userForm->get('confirm_password'));
                             
 %properties%
-                            echo $this->formHidden($userForm->get('user_login')->get('users_csrf'));
+                            echo $this->formHidden($userForm->get('users_csrf'));
                             echo $this->formSubmit($userForm->get('submit'));
                             echo $this->form()->closeTag();
                         ?>
