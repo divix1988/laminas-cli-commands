@@ -3,6 +3,8 @@
 CLI Commands for Laminas projects.
 *WARNING, STILL IN BETA.*
 
+Official website: http://laminasstarterkit.omelak.com
+
 ## Installation
 
 ### Via Composer
