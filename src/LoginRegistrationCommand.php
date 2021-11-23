@@ -45,17 +45,17 @@ class LoginRegistrationCommand extends AbstractCommand
         
         $defualProperties = [
             'password',
-            'passwordSalt',
+            'password_salt',
             'role',
             'username'
         ];
-        $properties = array_merge($inputProperties, $defualProperties);
+        $properties = array_unique(array_merge($inputProperties, $defualProperties));
         
-        foreach ($defualProperties as $property) {
+        /*foreach ($defualProperties as $property) {
             if (($key = array_search($property, $properties)) !== false) {
                 unset($properties[$key]);
             }
-        }
+        }*/
         
         $section1->writeln('Start creating new Model.');
         $this->generateModel($moduleName, 'Users', $output, $properties);
@@ -72,7 +72,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->createStaticUtils($moduleName, 'LoginRegister/Utils', 'Helper.php', $section2);
         $this->createRegisterController($moduleName, $section2);
         $this->createRegisterView($moduleName, $properties, $section2);
-        $this->createHydrator($moduleName, $section2);
+        $this->createHydrator($moduleName, $properties, $section2);
         $this->createStaticForm($moduleName, 'UserLoginFieldset', $section2);
         $this->createStaticForm($moduleName, 'UserLoginForm', $section2);
         $this->createStaticForm($moduleName, 'UsernameFieldset', $section2);
@@ -130,6 +130,16 @@ class LoginRegistrationCommand extends AbstractCommand
                     ],
                 ],
             ],
+            \'user\' => [
+                \'type\' => Segment::class,
+                \'options\' => [
+                    \'route\' => \'/user[/:action]\',
+                    \'defaults\' => [
+                        \'controller\' => Controller\UserController::class,
+                        \'action\' => \'index\',
+                    ],
+                ],
+            ],
 '
             ],
 
@@ -149,6 +159,7 @@ class LoginRegistrationCommand extends AbstractCommand
                     $sm->get(Utils\Authentication::class)
                 );
             },
+            Controller\UserController::class => InvokableFactory::class,
 '
             ],
              'service_manager/factories' => [
@@ -318,6 +329,9 @@ public function bootstrapSession($e)
         $propertiesCode = '';
         
         foreach ($properties as $property) {
+            if ($property === 'password_salt' || $property === 'role') {
+                continue;
+            }
             $propertiesCode .= 
 '                            echo $this->formRow($userForm->get(\''.$property.'\'));'.PHP_EOL;
             if ($property === 'password') {
@@ -335,10 +349,21 @@ public function bootstrapSession($e)
         $this->storeViewContents('index.phtml', $moduleName, 'register', $abstractContents);
     }
     
-    protected function createHydrator($moduleName, $section2)
+    protected function createHydrator($moduleName, $properties, $section2)
     {
         $abstractContents = file_get_contents(__DIR__.'/Templates/LoginRegister/Hydrator/UserFormHydrator.php');
         $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
+        $propertiesCode = '';
+        
+        foreach ($properties as $property) {
+            if ($property === 'password' || $property === 'password_salt' || $property === 'email') {
+                continue;
+            }
+            $propertiesCode .= 
+'            \''.$property.'\' => $data[Form\UserRegisterForm::ELEMENT_'.strtoupper($property).'],'.PHP_EOL;
+        }
+        
+        $abstractContents = str_replace("%hydrate_fileds%", $propertiesCode, $abstractContents);
         
         if ($this->isJsonMode()) {
             $code = (json_encode(['UserFormHydrator.php' => $abstractContents]));
@@ -373,10 +398,12 @@ public function bootstrapSession($e)
             $constantsCode .=
 '   const ELEMENT_'.strtoupper($property).' = \''.$property.'\';'.PHP_EOL;
 
+            $type = $property === 'password' ? 'password' : 'text';
+
             $propertiesCode .= 
 '       $this->add([
             \'name\' => self::ELEMENT_'.strtoupper($property).',
-            \'type\' => \'text\',
+            \'type\' => \''.$type.'\',
             \'options\' => [
                 \'label\' => \''.ucfirst($property).'\'
             ],
@@ -439,7 +466,9 @@ public function bootstrapSession($e)
     protected function createSql($moduleName, $properties, $section2)
     {
         $contents = 'CREATE TABLE `users` (
-   `id` int(10) UNSIGNED NOT NULL,
+   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+   `password_salt` varchar(30) NOT NULL,
+   `role` varchar(30) NOT NULL DEFAULT `user`,
 ';
         foreach ($properties as $property) {
             $contents .= '    `'.$property.'` varchar(250) NOT NULL,'.PHP_EOL;

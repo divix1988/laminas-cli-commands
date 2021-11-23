@@ -78,7 +78,7 @@ class UserRegisterForm extends \Laminas\Form\Form implements \Laminas\InputFilte
                     [
                         'name' => \Laminas\Validator\Identical::class,
                         'options' => [
-                            'token' => ['password'],
+                            'token' => 'password',
                             'messages' => [
                                 \Laminas\Validator\Identical::NOT_SAME => 'Passwords are not the same'
                             ]
