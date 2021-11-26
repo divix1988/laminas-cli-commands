@@ -44,7 +44,7 @@ class ViewCommand extends AbstractCommand
         
         $controllerName = $input->getArgument('controller');
         $name = $input->getArgument('name');
-        $contents = '<p>'.$moduleName.' - '.$name.'</p>';
+        $contents = '<p>'.$moduleName.' - '.$controllerName.' - '.$name.'</p>';
         
         $section2->writeln(PHP_EOL.$contents.PHP_EOL);
         
