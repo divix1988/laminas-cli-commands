@@ -73,7 +73,7 @@ class CrudCommand extends AbstractCommand
         $section1->writeln('End creating new Rowset.');
         
         $section1->writeln('Start creating new Form.');
-        $this->generateForm($moduleName, $name, $output, $properties);
+        $this->generateForm($moduleName, $name, $output, array_merge($properties, ['id']));
         $section1->writeln('End creating new Form.');
         
         $section1->writeln('Start creating Views for: index.phtml, create.phtml, update.phtml and delete.phtml.');
@@ -106,7 +106,7 @@ class CrudCommand extends AbstractCommand
             [
                 'name_singular' => rtrim($name, 's'),
                 'name_plural' => $name,
-                'columns' => $properties
+                'columns' => array_merge($properties, ['id'])
             ]
         );
         $this->generateCrudView(
@@ -175,7 +175,7 @@ class CrudCommand extends AbstractCommand
         $arguments = [
             'command' => 'mvc:crud_view',
             'name' => $viewType,
-            'controller' => $name,
+            'controller' => strtolower($name),
             '--module' => $moduleName,
             '--print_mode' => true,
             '--json' => $this->isJsonMode()

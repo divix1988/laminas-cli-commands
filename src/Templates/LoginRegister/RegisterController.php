@@ -40,15 +40,15 @@ class RegisterController extends AbstractController {
                 $hydrator = new Hydrator\UserFormHydrator($this->securityHelper);
                 $formData = $form->getData();
                 $rowset->exchangeArray($hydrator->hydrate($form));
-                $rowset->setRole('user');
 
                 //store to database
                 $userId = $this->usersModel->save($rowset);
                 $rowset->setId($userId);
+                $rowset->setRole('user');
                 //user logging
                 $this->securityAuth->auth(
                     $rowset->getEmail(),
-                    $formData[Form\UserLoginFieldset::ELEMENT_PASSWORD]
+                    $formData[$form::FIELDSET_LOGIN][Form\UserLoginFieldset::ELEMENT_PASSWORD]
                 );
                 $identity = $this->securityAuth->getIdentityArray();
                 

@@ -19,13 +19,13 @@ class UserFormHydrator implements \Laminas\Hydrator\Strategy\StrategyInterface
             throw new \Exception('invalid form object passed to the'.__CLASS__);
         }
         $data = $form->getData();
-        $hashedPassword = $this->securityHelper->sha512($data[Form\UserRegisterForm::ELEMENT_PASSWORD]);
+        $hashedPassword = $this->securityHelper->sha512($data[$form::FIELDSET_LOGIN][Form\UserLoginFieldset::ELEMENT_PASSWORD]);
         
         return [
-            'email' => $data[Form\UserRegisterForm::ELEMENT_EMAIL],
+            'username' => $data[$form::FIELDSET_USERNAME][Form\UsernameFieldset::ELEMENT_USERNAME],
+            'email' => $data[$form::FIELDSET_LOGIN][Form\UserLoginFieldset::ELEMENT_EMAIL],
             'password' => $hashedPassword['hash'],
-            'password_salt' => $hashedPassword['salt'],
-%hydrate_fileds%
+            'password_salt' => $hashedPassword['salt']
         ];
     }
 

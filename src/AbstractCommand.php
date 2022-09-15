@@ -261,7 +261,7 @@ class AbstractCommand extends Command
     protected function injectNewConfigToModuleFile($moduleName, $name)
     {
         if ($this->isJsonMode()) {
-            return 'return array_merge(include __DIR__ . \'/../config/module.config.php\', include __DIR__ . \'/../config/'.$name.'.php\');';
+            return 'return array_replace_recursive(include __DIR__ . \'/../config/module.config.php\', include __DIR__ . \'/../config/'.$name.'.php\');';
         }
         $filePath = self::MODULE_SRC.$moduleName.self::MODULE_FILE_SRC;
         
@@ -269,9 +269,17 @@ class AbstractCommand extends Command
         
         $contents = str_replace(
             'return include __DIR__ . \'/../config/module.config.php\';',
-            'return array_merge(include __DIR__ . \'/../config/module.config.php\', include __DIR__ . \'/../config/'.$name.'.php\');', 
+            'return array_replace_recursive(include __DIR__ . \'/../config/module.config.php\', include __DIR__ . \'/../config/'.$name.'.php\');', 
             $contents
         );
+        
+        if (strpos($contents, 'array_replace_recursive') >= 0) {
+            $contents = str_replace(
+                '.php\');',
+                '.php\', include __DIR__ . \'/../config/'.$name.'.php\');', 
+                $contents
+            );
+        }
         
         file_put_contents($filePath, $contents);
     }
@@ -396,7 +404,7 @@ class AbstractCommand extends Command
             $section2->writeln($code);
         }
         
-        $this->storeViewContents($filename.'.phtml', $moduleName, 'admin', $abstractContents);
+        $this->storeViewContents($filename.'.php', $moduleName, 'admin', $abstractContents);
     }
     
     protected function injectConfigCodes(array $input, $section, $moduleName, $configType)
@@ -465,7 +473,7 @@ class AbstractCommand extends Command
         } else {
             throw new Exception('invalid configType');
         }
-
+        
         if (is_array($newContentContainer) && !isset($newContentContainer['contents'])) {
             throw new Exception('invalid new contents configuration');
         }
@@ -486,14 +494,13 @@ class AbstractCommand extends Command
         
         $sectionNames = explode('/', $sectionName);
         $firstSectionNameString = "'".reset($sectionNames)."' => ";
-        $lastSectionNameString = "'".end($sectionNames)."' => ";
+        $lastSectionNameString = "'".end($sectionNames)."'";
         
         $sectionNameString = "'".end($sectionNames)."' => ";
         
         if (count($sectionNames) == 2) {
             $sectionNameString = $firstSectionNameString.$sectionNameString;
         }
-        
         $noSpacesContents = preg_replace('/\s+/', '', $fileContents);
         $noSpacesNewContents = preg_replace('/\s+/', '', $newContents);
         
@@ -517,7 +524,6 @@ class AbstractCommand extends Command
         if (strpos($noSpacesContents, preg_replace('/\s+/', '', $sectionNameString)) > 0) {
             //get current contents
             preg_match('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $fileContents, $matches);
-            
             $newContents = str_replace($sectionNameString."[", '', $newContents);
             
             //remove last closing bracket for current section
@@ -544,13 +550,8 @@ class AbstractCommand extends Command
                     $output = $fileContents;
                 }
             } else {
-                
-                if ($newContentContainer['is_alias_unique']) {
-                    $output = preg_replace('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $matches[0].$newContents, $fileContents);
-                } else {
-                    //@TODO do a support for checking each of the 2nd level section
-                    $output = $fileContents;
-                }
+                //@TODO do a support for checking each of the 2nd level section
+                $output = $fileContents;
             }
         } else {
             //section is missing in root

@@ -63,7 +63,7 @@ class UserLoginFieldset extends Fieldset implements InputFilterProviderInterface
                     [
                         'name' => \Laminas\Validator\StringLength::class,
                         'options' => [
-                            'min' => 2, 
+                            'min' => 5, 
                             'messages' => [
                                 \Laminas\Validator\StringLength::TOO_SHORT => 'The minimum length is: %min%'
                             ]

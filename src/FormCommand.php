@@ -56,11 +56,12 @@ class FormCommand extends AbstractCommand
 
         if (!empty($properties)) {
             foreach ($properties as $property) {
+                $propertyType = $property == 'id' ? 'hidden' : 'text';
                 $form->addConstant('ELEMENT_'.strtoupper($property), $property);
                 $formElements .= 
 '$this->add([
     \'name\' => self::ELEMENT_'.strtoupper($property).',
-    \'type\' => \'text\',
+    \'type\' => \''.$propertyType.'\',
     \'options\' => [
         \'label\' => \''.$property.'\'
     ],

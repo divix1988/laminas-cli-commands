@@ -65,13 +65,4 @@ return [
             },
         ]
     ],
-                    
-    'view_manager' => [
-        'template_map' => [
-            '%module_name_plural_dashed%/%name_plural_dashed%/index' => __DIR__ . '/../view/%name_plural_upper%/index.phtml',
-            '%module_name_plural_dashed%/%name_plural_dashed%/edit' => __DIR__ . '/../view/%name_plural_upper%/edit.phtml',
-            '%module_name_plural_dashed%/%name_plural_dashed%/add' => __DIR__ . '/../view/%name_plural_upper%/add.phtml',
-            '%module_name_plural_dashed%/%name_plural_dashed%/pagination' => __DIR__ . '/../view/%name_plural_upper%/pagination.phtml',
-        ],
-    ]
 ];

@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 /**
  * Usage:
  * 
- * "vendor/bin/laminas.bat" mvc:navigation --module=<moduleName> --items<item1> --items<item2> --include_controllers=<boolean> <name>
+ * "vendor/bin/laminas.bat" mvc:navigation --module=<moduleName> --items<item1> --items<item2> --include_controller=<boolean> <name>
  */
 class NavigationCommand extends AbstractCommand
 {
@@ -24,7 +24,7 @@ class NavigationCommand extends AbstractCommand
             ->setHelp('This command allows you to create a MVC navigation')
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the navigation.')
             ->addOption('items', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL, 'Navigation items list')
-            ->addOption('include_controllers', null, InputOption::VALUE_OPTIONAL, 'Create Navigation controllers');
+            ->addOption('include_controller', null, InputOption::VALUE_OPTIONAL, 'Create Navigation controller');
         
         parent::configure();
     }
@@ -39,18 +39,13 @@ class NavigationCommand extends AbstractCommand
         $moduleName = $this->getModuleName($input, $output, 'primary');
         $name = $input->getArgument('name');
         $inputItems = $this->getPropertiesArray($input, 'items');
-        $controllersConfig = '';
         
         $globalPhpCode = 
 '
-            \''.$name.'\' => [
+        \''.$name.'\' => [
 ';
 
         foreach ($inputItems as $item) {
-            if (!empty($input->getOption('include_controllers'))) {
-                $controllersConfig .= 
-'        Controller\\'.str_replace(' ', '', ucfirst($item)).'Controller::class => InvokableFactory::class,'.PHP_EOL;
-            }
             $globalPhpCode .= 
 '            [
                 \'label\' => \''.$item.'\',
@@ -68,7 +63,7 @@ class NavigationCommand extends AbstractCommand
 '
 <?= $this->navigation(\'Laminas\Navigation\\'.$name.'\')->menu()
     ->setMaxDepth(2)
-    ->setPartial(\''.strtolower($moduleName).'//_shared/menu\')
+    ->setPartial(\'_shared/menu\')
     ->setRenderInvisible(false)
     ->renderPartialWithParams(
         [
@@ -92,32 +87,26 @@ class NavigationCommand extends AbstractCommand
 
         $this->injectConfigCodes([
             'module.config.php' => [
-                'controllers' =>
+                'controllers/factories' =>
 '
-            '.$controllersConfig.'
+            Controller\\'.$name.'MenuController::class => InvokableFactory::class,
 ',
-                'template_path_stack' => [
-                    'identifier' => 'shared',
-                    'contents' =>
-'    __DIR__ . \'/../view/'.$moduleName.'/_shared\'
-'
-                ],
-                'routes' => [
-                    'identifier' => "'".$inputItems[1]."' => ",
-                    'is_alias_unique' => true,
-                    'contents' =>
+                'view_manager/template_path_stack' => 
+'    
+            __DIR__ . \'/../view\',
+            __DIR__ . \'/../view/'.$moduleName.'/_shared\'
+',
+                'router/routes' =>
 '
 '.$this->getRoutesCode($name, $moduleName, $inputItems).'
 '
-                ]
             ]
         ], $section2, $moduleName, 'module');
 
-        $this->createMenuView($moduleName, $section2);
-        $section2->writeln('Done creating navigation.');
+        $this->createStaticView($moduleName, 'Navigation/View', 'menu.phtml', $section2);
         
-        if (!empty($input->getOption('include_controllers'))) {
-            $this->generateControllers($moduleName, $name, $output, $inputItems);
+        if (!empty($input->getOption('include_controller'))) {
+            $this->generateController($moduleName, $name, $output, $inputItems);
             $this->generateViews($moduleName, $name, $output, $inputItems);
         }
 
@@ -140,7 +129,7 @@ class NavigationCommand extends AbstractCommand
                  \'options\' => [
                      \'route\'    => \'/'.$lowerItem.'\',
                      \'defaults\' => [
-                         \'controller\' => Controller\\'.$item.'Controller::class,
+                         \'controller\' => Controller\\'.$name.'MenuController::class,
                          \'action\'     => \''.$lowerItem.'\',
                      ],
                  ],
@@ -156,9 +145,9 @@ class NavigationCommand extends AbstractCommand
         foreach ($inputItems as $item) {
             $this->generateView(
                 $moduleName, 
-                $item, 
+                $name, 
                 $output,
-                strtolower(str_replace(' ', '', 'index'))
+                strtolower(str_replace(' ', '', $item))
             );
         }
 
@@ -185,35 +174,21 @@ class NavigationCommand extends AbstractCommand
         $command->run($greetInput, $output);
     }
     
-    protected function generateControllers($moduleName, $name, OutputInterface $output, $items)
+    protected function generateController($moduleName, $name, OutputInterface $output, $items)
     {
         $command = $this->getApplication()->find('mvc:controller');
 
-        foreach ($items as $item){
-            $arguments = [
-                'command' => 'mvc:controller',
-                'name' => $item,
-                '--actions' => [],
-                '--module' => $moduleName,
-                '--print_mode' => true,
-                '--json' => $this->isJsonMode()
-            ];
+        $arguments = [
+            'command' => 'mvc:controller',
+            'name' => $name.'Menu',
+            '--actions' => $items,
+            '--module' => $moduleName,
+            '--print_mode' => true,
+            '--json' => $this->isJsonMode()
+        ];
 
-            $greetInput = new ArrayInput($arguments);
-            $command->run($greetInput, $output);
-        }
-    }
-    
-    protected function createMenuView($moduleName, $section2)
-    {
-        $abstractContents = file_get_contents(__DIR__.'/Templates/Navigation/View/menu.phtml');
-        
-        if ($this->isJsonMode()) {
-            $code = (json_encode(['_shared/menu.phtml' => $abstractContents]));
-            $section2->writeln($code);
-        }
-        
-        $this->storeViewContents('menu.phtml', $moduleName, '_shared', $abstractContents);
+        $greetInput = new ArrayInput($arguments);
+        $command->run($greetInput, $output);
     }
     
 }

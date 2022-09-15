@@ -78,7 +78,7 @@ if (!$request->isPost()) {
     return [\''.$nameSingularLower.'Form\' => $'.$name.'Form];
 }
 $'.$name.'Model = new '.$nameSingularUpper.'();
-$'.$name.'Form->setInputFilter($'.$name.'Model->getInputFilter());
+$'.$name.'Form->setInputFilter($'.$name.'Model->getInputFilter(false));
 $'.$name.'Form->setData($request->getPost());
 
 if (!$'.$name.'Form->isValid()) {
@@ -122,7 +122,7 @@ $'.$name.'Form->setData($request->getPost());
 if (!$'.$name.'Form->isValid()) {
     return $view;
 }
-$this->'.$name.'able->save($'.$name.'Row);
+$this->'.$name.'Table->save($'.$name.'Row);
 // data saved, redirect to the users list page
 return $this->redirect()->toRoute(\''.$name.'\', [\'action\' => \'index\']);'
           );
@@ -142,7 +142,7 @@ if ($request->isPost()) {
 
     if ($del == \'Delete\') {
         $'.$name.'Id = (int) $request->getPost(\'id\');
-        $this->usersTable->delete($'.$name.'Id);
+        $this->'.$name.'Table->delete($'.$name.'Id);
     }
     // redirect to the users list
     return $this->redirect()->toRoute(\''.$name.'\');

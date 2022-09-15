@@ -49,11 +49,14 @@ class RowsetCommand extends AbstractCommand
         $rowset->setName($name)
             ->setNamespaceName($moduleName . '\Model\Rowset')
             ->setExtendedClass($moduleName . '\Model\Rowset\AbstractModel')
-            ->setImplementedInterfaces(['\Laminas\InputFilter\InputFilterAwareInterface']);
+            ->addUse('Laminas\Filter\ToInt')
+            ->setImplementedInterfaces(['\Laminas\InputFilter\InputFilterAwareInterface'])
+            ->addProperty('inputFilter');
        
         $exchangeArrayBody = 
         '       $this->id = (!empty($row[\'id\'])) ? $row[\'id\'] : null;'.PHP_EOL;
         $getArrayCopyBody = '\'id\' => $this->getId(),'.PHP_EOL;
+        $inputFilterProperties = '';
         
         if (!array_search('id', $properties)) {
             $properties[] = 'id';
@@ -75,6 +78,13 @@ class RowsetCommand extends AbstractCommand
 '$this->'.$property.' = $value;
 return $this;'
                 );
+                //id is already appended to rowset
+                if ($property != 'id') {
+                    $inputFilterProperties .= '
+$inputFilter->add([
+    \'name\' => \''.$property.'\',
+]);'.PHP_EOL;
+                }
                 
                 $exchangeArrayBody .= '$this->'.$property.' = (!empty($row[\''.$property.'\'])) ? $row[\''.$property.'\'] : null;'.PHP_EOL;
                 $getArrayCopyBody .= '    \''.$property.'\' => $this->get'. ucfirst($property).'(),'.PHP_EOL;
@@ -100,9 +110,28 @@ return $this;'
             )
             ->addMethod(
                 'getInputFilter',
-                [],
+                [['name' => 'includeIdField', 'type' => 'bool', 'defaultValue' => true]],
                 MethodGenerator::FLAG_PUBLIC,
-'return new \Laminas\InputFilter\InputFilter();'
+'if ($this->inputFilter) {
+    return $this->inputFilter;
+}
+
+$inputFilter = new \Laminas\InputFilter\InputFilter();
+
+if ($includeIdField) {
+    $inputFilter->add([
+        \'name\' => \'id\',
+        \'required\' => true,
+        \'filters\' => [
+            [\'name\' => ToInt::class],
+        ],
+    ]);
+}'
+
+.$inputFilterProperties.'
+
+$this->inputFilter = $inputFilter;
+return $inputFilter;'
             )
             ->addMethod(
                 'setInputFilter',
