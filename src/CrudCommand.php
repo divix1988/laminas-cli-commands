@@ -36,17 +36,19 @@ class CrudCommand extends AbstractCommand
         $this->input = $input;
         $section1 = $output->section();
         $section2 = $output->section();
-        $section1->writeln('Start creating a CRUD');
-        
-        $moduleName = $this->getModuleName($input, $output, 'model');
-        
-        $this->createAbstractModel($moduleName);
         
         $name = ucfirst($input->getArgument('name'));
         $singularName = rtrim($name, 's');
         $properties = $this->getPropertiesArray($input);
         $generatedGetByFilters = '';
         $generatedPatchFilters = '';
+        
+        $section1->writeln('');
+        $section1->writeln('Start creating a CRUD with properties: '.join($properties, ', '));
+        
+        $moduleName = $this->getModuleName($input, $output, 'model');
+        
+        $this->createAbstractModel($moduleName);
         
         $model = new ClassGenerator();
         $model->setName($name.'Table')
@@ -225,13 +227,13 @@ class CrudCommand extends AbstractCommand
    `id` int(10) UNSIGNED NOT NULL,
 ';
         foreach ($properties as $property) {
-            $contents .= '    `'.$property.'` varchar(250) NOT NULL,'.PHP_EOL;
+            $contents .= '    `'.trim($property).'` varchar(250) NOT NULL,'.PHP_EOL;
         }
         $contents = rtrim(trim($contents), ',').PHP_EOL;
         $contents .= ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;';
         
         if ($this->isJsonMode()) {
-            $code = (json_encode(['sql/crud_'.$name.'.sql' => $contents]));
+            $code = (json_encode(['crud_'.$name.'.sql' => $contents]));
             $section2->writeln($code);
         }
         
