@@ -85,7 +85,7 @@ class CrudViewCommand extends AbstractCommand
             $this->createPaginationView($moduleName, $controllerName, $section2);
         }
        
-        $section1->writeln(PHP_EOL.$contents.PHP_EOL);
+        //$section1->writeln(PHP_EOL.$contents.PHP_EOL);
 
         if ($this->isJsonMode()) {
             $code = (json_encode([$name.'.phtml' => $contents]));

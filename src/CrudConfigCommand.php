@@ -63,7 +63,7 @@ class CrudConfigCommand extends AbstractCommand
             $code = (json_encode([$name.'.php' => $contents]));
             $section2->writeln($code);
         }
-        $section2->writeln(PHP_EOL.$contents.PHP_EOL);
+        //$section2->writeln(PHP_EOL.$contents.PHP_EOL);
         
         $this->storeConfigContents($name.'.php', $moduleName, $contents);
         $this->injectNewConfigToModuleFile($moduleName, $name);

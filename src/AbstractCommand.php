@@ -66,8 +66,9 @@ class AbstractCommand extends Command
     protected function postExecute(InputInterface $input, OutputInterface $output, OutputInterface &$section1, &$section2)
     {
         if ($this->getPrintMode($input)) {
+            //exit('clearing');
             $section1->clear();
-            //$section2->clear();
+            $section2->clear();
         }
     }
     

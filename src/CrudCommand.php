@@ -43,6 +43,7 @@ class CrudCommand extends AbstractCommand
         $this->createAbstractModel($moduleName);
         
         $name = ucfirst($input->getArgument('name'));
+        $singularName = rtrim($name, 's');
         $properties = $this->getPropertiesArray($input);
         $generatedGetByFilters = '';
         $generatedPatchFilters = '';
@@ -60,19 +61,19 @@ class CrudCommand extends AbstractCommand
             }
         }
         
-        $section1->writeln('Start creating new Controller.');
+        $section1->writeln('Start creating new Controller: Controller/'.$name.'Controller.php');
         $this->generateCrudController($moduleName, $name, $output);
         $section1->writeln('End creating new Controller.');
         
-        $section1->writeln('Start creating new Model.');
+        $section1->writeln('Start creating new Model: Model/'.$name.'Table.php');
         $this->generateModel($moduleName, $name, $output, $properties);
         $section1->writeln('End creating new Model.');
         
-        $section1->writeln('Start creating new Rowset.');
+        $section1->writeln('Start creating new Rowset: Model/Rowset/'.$singularName.'.php');
         $this->generateRowset($moduleName, $name, $output, $properties);
         $section1->writeln('End creating new Rowset.');
         
-        $section1->writeln('Start creating new Form.');
+        $section1->writeln('Start creating new Form: Form/'.$singularName.'Form.php');
         $this->generateForm($moduleName, $name, $output, array_merge($properties, ['id']));
         $section1->writeln('End creating new Form.');
         
@@ -122,9 +123,13 @@ class CrudCommand extends AbstractCommand
         );
         $section1->writeln('End creating new Views.');
         
-        $section1->writeln('Start creating new Config.');
+        $section1->writeln('Start creating new Config: config/generated.crud.php');
         $this->generateConfig($moduleName, $name, $output, 'generated.crud');
         $section1->writeln('End creating new Config.');
+        
+        $section1->writeln('Start creating SQL script: sql/crud_'.$name.'.sql');
+        $this->createSql($moduleName, $name, $properties, $section2);
+        $section1->writeln('End creating SQL script.');
         
         //$section2->writeln($model->generate());
         //$this->storeModelContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$model->generate());
@@ -211,5 +216,25 @@ class CrudCommand extends AbstractCommand
     protected function createAbstractModel($moduleName)
     {
         $this->storeModelContents('AbstractTable.php', $moduleName, null, 'AbstractTable.php');
+    }
+    
+    protected function createSql($moduleName, $name, $properties, $section2)
+    {
+        $name = strtolower($name);
+        $contents = 'CREATE TABLE `'.$name.'` (
+   `id` int(10) UNSIGNED NOT NULL,
+';
+        foreach ($properties as $property) {
+            $contents .= '    `'.$property.'` varchar(250) NOT NULL,'.PHP_EOL;
+        }
+        $contents = rtrim(trim($contents), ',').PHP_EOL;
+        $contents .= ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;';
+        
+        if ($this->isJsonMode()) {
+            $code = (json_encode(['sql/crud_'.$name.'.sql' => $contents]));
+            $section2->writeln($code);
+        }
+        
+        $this->storeSqlContents('crud_'.$name.'.sql', $moduleName, $contents);
     }
 }
