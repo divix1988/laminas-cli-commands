@@ -45,7 +45,7 @@ class CrudConfigCommand extends AbstractCommand
         $moduleName = $this->getModuleName($input, $output, 'view');
         $name = $input->getArgument('name');
         
-        $contents = @file_get_contents(__DIR__.'/Templates/Crud/Config/'.$name.'.php');
+        $contents = @file_get_contents(__DIR__.'/Templates/Crud/Config/generated.crud.php');
         
         if (empty($contents)) {
             throw new \Exception('invalid config filename');

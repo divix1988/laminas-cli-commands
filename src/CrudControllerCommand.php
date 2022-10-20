@@ -130,9 +130,9 @@ return $this->redirect()->toRoute(\''.$name.'\', [\'action\' => \'index\']);'
         
         $controller->getMethod('deleteAction')
             ->setBody(
-'$'.$name.'Id = (int) $this->params()->fromRoute(\'id\');
+'$'.$nameSingularLower.'Id = (int) $this->params()->fromRoute(\'id\');
 
-if (empty($'.$name.'Id)) {
+if (empty($'.$nameSingularLower.'Id)) {
     return $this->redirect()->toRoute(\''.$name.'\');
 }
 $request = $this->getRequest();
@@ -141,15 +141,15 @@ if ($request->isPost()) {
     $del = $request->getPost(\'del\', \'Cancel\');
 
     if ($del == \'Delete\') {
-        $'.$name.'Id = (int) $request->getPost(\'id\');
-        $this->'.$name.'Table->delete($'.$name.'Id);
+        $'.$nameSingularLower.'Id = (int) $request->getPost(\'id\');
+        $this->'.$name.'Table->delete($'.$nameSingularLower.'Id);
     }
     // redirect to the users list
     return $this->redirect()->toRoute(\''.$name.'\');
 }
 return [
-    \'id\' => $'.$name.'Id,
-    \''.$name.'\' => $this->'.$name.'Table->getById($'.$name.'Id),
+    \'id\' => $'.$nameSingularLower.'Id,
+    \''.$nameSingularLower.'\' => $this->'.$name.'Table->getById($'.$nameSingularLower.'Id),
 ];'
           );
         

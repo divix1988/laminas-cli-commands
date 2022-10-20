@@ -276,8 +276,8 @@ class AbstractCommand extends Command
         
         if (strpos($contents, 'array_replace_recursive') >= 0) {
             $contents = str_replace(
-                '.php\');',
-                '.php\', include __DIR__ . \'/../config/'.$name.'.php\');', 
+                '.php\'))',
+                '.php\', include __DIR__ . \'/../config/'.$name.'.php\'))', 
                 $contents
             );
         }
