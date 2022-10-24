@@ -375,7 +375,7 @@ class AbstractCommand extends Command
         $abstractContents = file_get_contents(__DIR__.'/Templates/'.$folder.'/'.$filename);
         
         if ($this->isJsonMode()) {
-            $code = (json_encode([$newName => $abstractContents]));
+            $code = (json_encode([$filename => $abstractContents]));
             $section2->writeln($code);
         }
         

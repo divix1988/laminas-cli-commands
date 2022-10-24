@@ -8,8 +8,8 @@ class UserRegisterForm extends \Laminas\Form\Form implements \Laminas\InputFilte
 {
     const TIMEOUT = 300;
     const ELEMENT_PASSWORD_CONFIRM = 'confirm_password';
-    const ELEMENT_CSRF = 'users_csrf';
     const ELEMENT_CAPTCHA = 'captcha';
+    const FIELDSET_LOGIN = 'login_fieldset';
     
 %constants%
 
@@ -19,17 +19,22 @@ class UserRegisterForm extends \Laminas\Form\Form implements \Laminas\InputFilte
         $this->setAttribute('class', 'styledForm');
         
 %properties%
+        
+        $this->add([
+            'type' => UserLoginFieldset::class,
+            'name' => self::FIELDSET_LOGIN,
+            'options' => $this->getOptions()
+        ]);
 
         $this->add([
-            'name' => self::ELEMENT_CSRF,
-            'type' => Element\Csrf::class,
+            'name' => self::ELEMENT_PASSWORD_CONFIRM,
+            'type' => Element\Password::class,
             'options' => [
-                'salt' => 'unique',
-                'timeout' => self::TIMEOUT
+                'label' => 'Repeat password',
             ],
             'attributes' => [
-                'id' => self::ELEMENT_CSRF
-            ]
+                'required' => true
+            ],
         ]);
 
         /*$this->add([
@@ -78,7 +83,7 @@ class UserRegisterForm extends \Laminas\Form\Form implements \Laminas\InputFilte
                     [
                         'name' => \Laminas\Validator\Identical::class,
                         'options' => [
-                            'token' => ['password'],
+                            'token' => ['login_fieldset' => 'password'],
                             'messages' => [
                                 \Laminas\Validator\Identical::NOT_SAME => 'Passwords are not the same'
                             ]

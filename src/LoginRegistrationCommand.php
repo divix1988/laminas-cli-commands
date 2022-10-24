@@ -43,18 +43,22 @@ class LoginRegistrationCommand extends AbstractCommand
         
         $inputProperties = $this->getPropertiesArray($input);
         
-        $defualProperties = [
+        $defaultProperties = [
             'password',
             'passwordSalt',
             'role',
             'username'
         ];
-        $properties = array_merge($inputProperties, $defualProperties);
+        $properties = array_merge($inputProperties, $defaultProperties);
         
-        foreach ($defualProperties as $property) {
+        foreach ($defaultProperties as $property) {
             if (($key = array_search($property, $properties)) !== false) {
                 unset($properties[$key]);
             }
+        }
+        
+        if (!array_search("password", $properties)) {
+            $properties[] = "password";
         }
         
         $section1->writeln('Start creating new Model.');
@@ -62,7 +66,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $section1->writeln('End creating new Model.');
         
         $section1->writeln('Start creating new Rowset.');
-        $this->generateRowset($moduleName, 'User', $output, $properties);
+        $this->generateRowset($moduleName, 'User', $output, array_merge($properties, ['role', 'password_salt']));
         $section1->writeln('End creating new Rowset.');
 
         $this->createStaticController($moduleName, 'AdminPanel/Controller', 'AbstractController.php', $section2);
@@ -107,7 +111,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->injectConfigCodes([
             'module.config.php' => [
                 'router/routes' => [
-                    'identifier' => "'register' => ",
+                    'identifier' => "'register' =>",
                     'contents' =>
 '
             \'register\' => [
@@ -126,6 +130,16 @@ class LoginRegistrationCommand extends AbstractCommand
                     \'route\' => \'/login[/:action]\',
                     \'defaults\' => [
                         \'controller\' => Controller\LoginController::class,
+                        \'action\' => \'index\',
+                    ],
+                ],
+            ],
+            \'user\' => [
+                \'type\' => Segment::class,
+                \'options\' => [
+                    \'route\' => \'/user[/:action]\',
+                    \'defaults\' => [
+                        \'controller\' => Controller\UserController::class,
                         \'action\' => \'index\',
                     ],
                 ],
@@ -149,6 +163,7 @@ class LoginRegistrationCommand extends AbstractCommand
                     $sm->get(Utils\Authentication::class)
                 );
             },
+            Controller\UserController::class => InvokableFactory::class,
 '
             ],
              'service_manager/factories' => [
@@ -318,8 +333,10 @@ public function bootstrapSession($e)
         $propertiesCode = '';
         
         foreach ($properties as $property) {
+            $prefix = $property == 'email' || $property == 'password' ? "->get('login_fieldset')" : "";
+                    
             $propertiesCode .= 
-'                            echo $this->formRow($userForm->get(\''.$property.'\'));'.PHP_EOL;
+'                            echo $this->formRow($userForm'.$prefix.'->get(\''.$property.'\'));'.PHP_EOL;
             if ($property === 'password') {
                 $propertiesCode .=
 '                            echo $this->formRow($userForm->get(\'confirm_password\'));'.PHP_EOL;
@@ -370,13 +387,15 @@ public function bootstrapSession($e)
         $propertiesCode = '';
         
         foreach ($properties as $property) {
+            $inputType = $property === 'password' ? 'password' : 'text';
+            
             $constantsCode .=
 '   const ELEMENT_'.strtoupper($property).' = \''.$property.'\';'.PHP_EOL;
 
             $propertiesCode .= 
 '       $this->add([
             \'name\' => self::ELEMENT_'.strtoupper($property).',
-            \'type\' => \'text\',
+            \'type\' => \''.$inputType.'\',
             \'options\' => [
                 \'label\' => \''.ucfirst($property).'\'
             ],

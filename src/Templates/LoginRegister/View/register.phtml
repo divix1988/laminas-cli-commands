@@ -12,7 +12,7 @@
                             echo $this->form()->openTag($userForm);
                             
 %properties%
-                            echo $this->formHidden($userForm->get('users_csrf'));
+                            echo $this->formHidden($userForm->get('login_fieldset')->get('users_csrf'));
                             echo $this->formSubmit($userForm->get('submit'));
                             echo $this->form()->closeTag();
                         ?>
