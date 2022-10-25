@@ -417,6 +417,10 @@ class AbstractCommand extends Command
                     
                     foreach ($contents as $sectionName => &$newContents) {
                         $firstSectionNameString = "'".key(reset($section))."' => ";
+                        
+                        if (is_array($newContents)) {
+                            $newContents = $newContents['contents'];
+                        }
                     
                         if (strpos($newContents, $firstSectionNameString) !== 0) {
                             $sectionNames = explode('/', $sectionName);
