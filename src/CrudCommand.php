@@ -224,7 +224,7 @@ class CrudCommand extends AbstractCommand
     {
         $name = strtolower($name);
         $contents = 'CREATE TABLE `'.$name.'` (
-   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 ';
         foreach ($properties as $property) {
             $contents .= '    `'.trim($property).'` varchar(250) NOT NULL,'.PHP_EOL;

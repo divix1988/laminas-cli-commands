@@ -56,6 +56,7 @@ class LoginRegistrationCommand extends AbstractCommand
                 unset($properties[$key]);
             }
         }
+        $additionalCoreFields = ['role', 'password_salt'];
         
         if (!array_search("password", $properties)) {
             $properties[] = "password";
@@ -66,7 +67,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $section1->writeln('End creating new Model.');
         
         $section1->writeln('Start creating new Rowset.');
-        $this->generateRowset($moduleName, 'User', $output, array_merge($properties, ['role', 'password_salt']));
+        $this->generateRowset($moduleName, 'User', $output, array_merge($properties, $additionalCoreFields));
         $section1->writeln('End creating new Rowset.');
 
         $this->createStaticController($moduleName, 'AdminPanel/Controller', 'AbstractController.php', $section2);
@@ -89,7 +90,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->createUserController($moduleName, $section2);
         $this->createUserView($moduleName, $section2);
         
-        $this->createSql($moduleName, $properties, $section2);
+        $this->createSql($moduleName, array_merge($properties, $additionalCoreFields), $section2);
         
         $this->injectConfigCodes([
             'autoload/global.php' => [
@@ -458,10 +459,11 @@ public function bootstrapSession($e)
     protected function createSql($moduleName, $properties, $section2)
     {
         $contents = 'CREATE TABLE `users` (
-   `id` int(10) UNSIGNED NOT NULL,
+   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
 ';
         foreach ($properties as $property) {
-            $contents .= '    `'.$property.'` varchar(250) NOT NULL,'.PHP_EOL;
+            $length = $property == 'password_salt' || $property == 'role' ? 50 : 250;
+            $contents .= '    `'.$property.'` varchar('.$length.') NOT NULL,'.PHP_EOL;
         }
         $contents = rtrim(trim($contents), ',').PHP_EOL;
         $contents .= ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;';
@@ -469,6 +471,11 @@ public function bootstrapSession($e)
         if ($this->isJsonMode()) {
             $code = (json_encode(['sql/users.sql' => $contents]));
             $section2->writeln($code);
+        } else {
+            $section2->writeln('');
+            $section2->writeln('#### COPY BELOW SQL SCRIPTS AND CREATE A DATABASE TABLE: ####');
+            $section2->writeln($contents);
+            $section2->writeln('');
         }
         
         $this->storeSqlContents('users.sql', $moduleName, $contents);
