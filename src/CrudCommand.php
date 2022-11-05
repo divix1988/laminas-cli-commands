@@ -125,8 +125,8 @@ class CrudCommand extends AbstractCommand
         );
         $section1->writeln('End creating new Views.');
         
-        $section1->writeln('Start creating new Config: config/generated.crud.'.strtolower($name).'.php');
-        $this->generateConfig($moduleName, $name, $output, 'generated.crud.'.strtolower($name));
+        $section1->writeln('Start creating new Config: config/generated.crud.php');
+        $this->generateConfig($moduleName, $name, $output, 'generated.crud');
         $section1->writeln('End creating new Config.');
         
         $section1->writeln('Start creating SQL script: sql/crud_'.$name.'.sql');
@@ -224,7 +224,7 @@ class CrudCommand extends AbstractCommand
     {
         $name = strtolower($name);
         $contents = 'CREATE TABLE `'.$name.'` (
-   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   `id` int(10) UNSIGNED NOT NULL,
 ';
         foreach ($properties as $property) {
             $contents .= '    `'.trim($property).'` varchar(250) NOT NULL,'.PHP_EOL;

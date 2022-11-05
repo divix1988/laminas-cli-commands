@@ -43,23 +43,18 @@ class LoginRegistrationCommand extends AbstractCommand
         
         $inputProperties = $this->getPropertiesArray($input);
         
-        $defaultProperties = [
+        $defualProperties = [
             'password',
             'passwordSalt',
             'role',
             'username'
         ];
-        $properties = array_merge($inputProperties, $defaultProperties);
+        $properties = array_merge($inputProperties, $defualProperties);
         
-        foreach ($defaultProperties as $property) {
+        foreach ($defualProperties as $property) {
             if (($key = array_search($property, $properties)) !== false) {
                 unset($properties[$key]);
             }
-        }
-        $additionalCoreFields = ['role', 'password_salt'];
-        
-        if (!array_search("password", $properties)) {
-            $properties[] = "password";
         }
         
         $section1->writeln('Start creating new Model.');
@@ -67,7 +62,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $section1->writeln('End creating new Model.');
         
         $section1->writeln('Start creating new Rowset.');
-        $this->generateRowset($moduleName, 'User', $output, array_merge($properties, $additionalCoreFields));
+        $this->generateRowset($moduleName, 'User', $output, $properties);
         $section1->writeln('End creating new Rowset.');
 
         $this->createStaticController($moduleName, 'AdminPanel/Controller', 'AbstractController.php', $section2);
@@ -90,7 +85,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->createUserController($moduleName, $section2);
         $this->createUserView($moduleName, $section2);
         
-        $this->createSql($moduleName, array_merge($properties, $additionalCoreFields), $section2);
+        $this->createSql($moduleName, $properties, $section2);
         
         $this->injectConfigCodes([
             'autoload/global.php' => [
@@ -112,7 +107,7 @@ class LoginRegistrationCommand extends AbstractCommand
         $this->injectConfigCodes([
             'module.config.php' => [
                 'router/routes' => [
-                    'identifier' => "'register' =>",
+                    'identifier' => "'register' => ",
                     'contents' =>
 '
             \'register\' => [
@@ -131,16 +126,6 @@ class LoginRegistrationCommand extends AbstractCommand
                     \'route\' => \'/login[/:action]\',
                     \'defaults\' => [
                         \'controller\' => Controller\LoginController::class,
-                        \'action\' => \'index\',
-                    ],
-                ],
-            ],
-            \'user\' => [
-                \'type\' => Segment::class,
-                \'options\' => [
-                    \'route\' => \'/user[/:action]\',
-                    \'defaults\' => [
-                        \'controller\' => Controller\UserController::class,
                         \'action\' => \'index\',
                     ],
                 ],
@@ -164,7 +149,6 @@ class LoginRegistrationCommand extends AbstractCommand
                     $sm->get(Utils\Authentication::class)
                 );
             },
-            Controller\UserController::class => InvokableFactory::class,
 '
             ],
              'service_manager/factories' => [
@@ -334,10 +318,8 @@ public function bootstrapSession($e)
         $propertiesCode = '';
         
         foreach ($properties as $property) {
-            $prefix = $property == 'email' || $property == 'password' ? "->get('login_fieldset')" : "";
-                    
             $propertiesCode .= 
-'                            echo $this->formRow($userForm'.$prefix.'->get(\''.$property.'\'));'.PHP_EOL;
+'                            echo $this->formRow($userForm->get(\''.$property.'\'));'.PHP_EOL;
             if ($property === 'password') {
                 $propertiesCode .=
 '                            echo $this->formRow($userForm->get(\'confirm_password\'));'.PHP_EOL;
@@ -388,15 +370,13 @@ public function bootstrapSession($e)
         $propertiesCode = '';
         
         foreach ($properties as $property) {
-            $inputType = $property === 'password' ? 'password' : 'text';
-            
             $constantsCode .=
 '   const ELEMENT_'.strtoupper($property).' = \''.$property.'\';'.PHP_EOL;
 
             $propertiesCode .= 
 '       $this->add([
             \'name\' => self::ELEMENT_'.strtoupper($property).',
-            \'type\' => \''.$inputType.'\',
+            \'type\' => \'text\',
             \'options\' => [
                 \'label\' => \''.ucfirst($property).'\'
             ],
@@ -459,11 +439,10 @@ public function bootstrapSession($e)
     protected function createSql($moduleName, $properties, $section2)
     {
         $contents = 'CREATE TABLE `users` (
-   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   `id` int(10) UNSIGNED NOT NULL,
 ';
         foreach ($properties as $property) {
-            $length = $property == 'password_salt' || $property == 'role' ? 50 : 250;
-            $contents .= '    `'.$property.'` varchar('.$length.') NOT NULL,'.PHP_EOL;
+            $contents .= '    `'.$property.'` varchar(250) NOT NULL,'.PHP_EOL;
         }
         $contents = rtrim(trim($contents), ',').PHP_EOL;
         $contents .= ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;';
@@ -471,11 +450,6 @@ public function bootstrapSession($e)
         if ($this->isJsonMode()) {
             $code = (json_encode(['sql/users.sql' => $contents]));
             $section2->writeln($code);
-        } else {
-            $section2->writeln('');
-            $section2->writeln('#### COPY BELOW SQL SCRIPTS AND CREATE A DATABASE TABLE: ####');
-            $section2->writeln($contents);
-            $section2->writeln('');
         }
         
         $this->storeSqlContents('users.sql', $moduleName, $contents);

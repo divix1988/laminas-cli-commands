@@ -128,6 +128,47 @@ class AbstractCommand extends Command
         file_put_contents($dir.$fileName, $contents);
     }
     
+    protected function storeContentsIntoModuleRoot($fileName, $moduleName, $contents): void
+    {
+        if ($this->isJsonMode()) {
+            return;
+        }
+        $dir = self::MODULE_SRC.$moduleName.'/';
+        
+        $this->createFoldersForDir($dir);
+        file_put_contents($dir.$fileName, $contents);
+    }
+    
+    
+    protected function copyModuleFolder($newName, $folderPath): void
+    {
+        if ($this->isJsonMode()) {
+            return;
+        }
+        $dir = self::MODULE_SRC.$newName.'/';
+        
+        $this->createFoldersForDir($dir);
+        $this->recurseCopy($folderPath, $dir);
+    }
+    
+    protected function recurseCopy($src, $dst) { 
+        $dir = opendir($src); 
+        @mkdir($dst);
+        $limit = 1;
+        
+        while (false !== ( $file = readdir($dir)) && $limit < 20 ) { 
+            if (( $file != '.' ) && ( $file != '..' )) { 
+                if ( is_dir($src . '/' . $file) ) { 
+                    $this->recurseCopy($src . '/' . $file,$dst . '/' . $file); 
+                } else { 
+                    copy($src . '/' . $file, $dst . '/' . $file); 
+                } 
+            }
+            $limit++;
+        } 
+        closedir($dir); 
+    }
+    
     protected function storeUtilsContents($fileName, $moduleName, $contents): void
     {
         if ($this->isJsonMode()) {
@@ -198,15 +239,57 @@ class AbstractCommand extends Command
         file_put_contents($dir.$fileName, $contents);
     }
     
-    protected function storeConfigContents($fileName, $moduleName, $contents): void
+    protected function storeConfigContents($fileName, $moduleName, $contents, $isRootAutoloadConfig = false): void
     {
         if ($this->isJsonMode()) {
             return;
         }
-        $dir = self::MODULE_SRC.$moduleName.self::MODULE_CONFIG_SRC;
+        
+        if ($isRootAutoloadConfig) {
+            $dir = self::MODULE_SRC.'\..\config\autoload\\';
+        } else {
+            $dir = self::MODULE_SRC.$moduleName.self::MODULE_CONFIG_SRC;
+        }
 
         $this->createFoldersForDir($dir); 
         file_put_contents($dir.$fileName, $contents);
+    }
+    
+    protected function modifyModulesConfigFile($newModuleName, $section2, $find = ']'): void
+    {
+        if ($this->isJsonMode()) {
+            $code = (json_encode(['modules.config.php' => "'$newModuleName',"]));
+            $section2->writeln($code);
+            return;
+        }
+        
+        $filePath = self::MODULE_SRC.'\..\config\modules.config.php';
+        
+        $currentContents = file_get_contents($filePath);
+        $currentContents = str_replace($find, "'$newModuleName',"."\n    ".$find, $currentContents);
+
+        file_put_contents($filePath, $currentContents);
+    }
+    
+    protected function modifyComposerFile($newContents, $section2, $find = '}'): void
+    {
+        if ($this->isJsonMode()) {
+            $code = (json_encode(['composer.json' => '    "autoload": {
+        "psr-4": {
+            ...
+            "'.$newModuleName.'\\": "module/'.$newModuleName.'/src/"
+        }
+    },']));
+            $section2->writeln($code);
+            return;
+        }
+        
+        $filePath = self::MODULE_SRC.'\..\composer.json';
+
+        $currentContents = file_get_contents($filePath);
+        $currentContents = str_replace($find, $newContents."\n    ".$find, $currentContents);
+
+        file_put_contents($filePath, $currentContents);
     }
     
     protected function storeViewContents($fileName, $moduleName, $controllerName, $contents): void
@@ -276,8 +359,8 @@ class AbstractCommand extends Command
         
         if (strpos($contents, 'array_replace_recursive') >= 0) {
             $contents = str_replace(
-                '.php\'))',
-                '.php\', include __DIR__ . \'/../config/'.$name.'.php\'))', 
+                '.php\');',
+                '.php\', include __DIR__ . \'/../config/'.$name.'.php\');', 
                 $contents
             );
         }
@@ -331,7 +414,7 @@ class AbstractCommand extends Command
             $section2->writeln($code);
         }
         
-        $this->storeControllerContents($filename, $moduleName, $abstractContents);
+        $this->storeContentsIntoModuleRoot($filename, $moduleName, $abstractContents);
     }
     
     protected function createStaticController($moduleName, $folder, $filename, $section2, $newName = null)
@@ -375,17 +458,16 @@ class AbstractCommand extends Command
         $abstractContents = file_get_contents(__DIR__.'/Templates/'.$folder.'/'.$filename);
         
         if ($this->isJsonMode()) {
-            $code = (json_encode([$filename => $abstractContents]));
+            $code = (json_encode([$newName => $abstractContents]));
             $section2->writeln($code);
         }
         
         $this->storeCssContents($filename, $moduleName, $abstractContents);
     }
     
-    protected function createStaticConfig($moduleName, $filename, $section2)
+    protected function createStaticConfig($moduleName, $filename, $section2, $isRootConfig = false)
     {
-        $abstractContents = file_get_contents(__DIR__.'/Templates/AdminPanel/'.$filename);
-        $abstractContents = str_replace("%module_name%", $moduleName, $abstractContents);
+        $abstractContents = file_get_contents(__DIR__.'/Templates/'.$moduleName.'/'.$filename);
         
         if ($this->isJsonMode()) {
             $abstractContents = str_replace("<?php", '', $abstractContents);
@@ -393,7 +475,19 @@ class AbstractCommand extends Command
             $section2->writeln($code);
         }
         
-        $this->storeControllerContents($filename, $moduleName, $abstractContents);
+        $this->storeConfigContents($filename, $moduleName, $abstractContents, $isRootConfig);
+    }
+    
+    protected function createStaticModule($newModuleName, $section2)
+    {
+        $folderPath = __DIR__.'\Templates\Admin\Module\\'.$newModuleName;
+        
+        if ($this->isJsonMode()) {
+            $code = (json_encode(['Module files' => 'Please use CLI command to get the files OR download a module from: https://github.com/divix1988/laminas-cli-commands/tree/master/src/Templates/AdminPanel/Module/']));
+            $section2->writeln($code);
+        }
+        
+        $this->copyModuleFolder($newModuleName, $folderPath);
     }
     
     protected function createStaticView($moduleName, $folder, $filename, $section2)
@@ -405,7 +499,7 @@ class AbstractCommand extends Command
             $section2->writeln($code);
         }
         
-        $this->storeViewContents($filename.'.php', $moduleName, 'admin', $abstractContents);
+        $this->storeViewContents($filename, $moduleName, 'admin', $abstractContents);
     }
     
     protected function injectConfigCodes(array $input, $section, $moduleName, $configType)
@@ -417,10 +511,6 @@ class AbstractCommand extends Command
                     
                     foreach ($contents as $sectionName => &$newContents) {
                         $firstSectionNameString = "'".key(reset($section))."' => ";
-                        
-                        if (is_array($newContents)) {
-                            $newContents = $newContents['contents'];
-                        }
                     
                         if (strpos($newContents, $firstSectionNameString) !== 0) {
                             $sectionNames = explode('/', $sectionName);

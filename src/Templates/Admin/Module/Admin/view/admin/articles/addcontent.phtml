@@ -1,0 +1,20 @@
+<?= $this->partial('admin/_shared/articles_menu.phtml'); ?>
+
+<div class="col-sm-9">
+   
+    <div class="adminBox">
+        <div class="adminBoxHeader">
+            <h3>Add new contents</h3>
+        </div>
+        <div class="adminBoxContent">
+           <?= isset($messages) ? $messages : '' ?>
+           <?php
+              echo $this->form()->openTag($addContentForm);
+              echo $this->formRow($addContentForm->get('name'));
+              echo $this->formSubmit($addContentForm->get('submit'));
+              echo $this->form()->closeTag();
+          ?>
+        </div>
+    </div>
+   
+</div>

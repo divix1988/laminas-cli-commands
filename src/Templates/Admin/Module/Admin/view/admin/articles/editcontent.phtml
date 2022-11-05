@@ -1,0 +1,71 @@
+<?= $this->partial('admin/_shared/articles_menu.phtml'); ?>
+
+<div class="col-sm-9">
+   
+   <div class="adminBox">
+
+      <div class="adminBoxContent">
+         <?php if (!empty($contentLanguages)): ?>
+            <h1>Edit contents:</h1>
+
+            <form action="<?= $this->url('admin/articles', ['action' => 'updatelangcontent', 'id' => $contentId]); ?>" method="post" class="styledForm">
+               <fieldset>
+                    <label>Language version: </label>
+                    <select name="lang" id="changeLang">
+                       <?php foreach ($contentLanguages as $language): ?>
+                       <option><?= $language['lang'] ?></option>
+                       <?php endforeach; ?>
+                    </select>
+               </fieldset>
+               <?php foreach ($contentLanguages as $key => $language): ?>
+                  <input type="hidden" name="langID_<?= $language['lang'] ?>" class="langID_<?= $language['lang'] ?>" value="<?= $language['id'] ?>" />
+                  <fieldset class="<?= ($key != 0) ? 'hide' : 'previousContent' ?> langContainer_<?= $language['lang'] ?>">
+                     <label>Contents: </label>
+                     <textarea name="contents_<?= $language['lang'] ?>" class="contents contents_<?= $language['lang'] ?>" id="ckeditor_<?= $language['lang'] ?>">
+                        <?= $language['content'] ?>
+                     </textarea>
+                  </fieldset>
+               <?php endforeach; ?>
+               <script>
+                    $(function () {
+                        <?php foreach ($contentLanguages as $key => $language): ?>
+                        CKEDITOR.replace('ckeditor_<?= $language['lang'] ?>');
+                        <?php endforeach; ?>
+                    });
+               </script>
+               <br />
+               <?= $this->formSubmit($addLangContentForm->get('submit')->setValue('Save')) ?>
+            </form>
+        <?php endif; ?>
+         
+         <div class="separator"> </div>
+         <h1>Add new language version:</h1>
+         <?php
+            echo $this->form()->openTag($addLangContentForm);
+            echo $this->formRow($addLangContentForm->get('language'));
+            echo $this->formRow($addLangContentForm->get('content'));
+            echo $this->formSubmit($addLangContentForm->get('submit'));
+            echo $this->form()->closeTag();
+        ?>
+      </div>
+   </div>
+   
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function() { 
+                
+        $('#changeLang').change(function() { 
+            selectedLang = $(this).val();
+            formObject = $(this).parent().parent().parent();
+            previousObject = $('.previousContent');
+            newObject = $('.langContainer_'+selectedLang);
+
+            previousObject.toggleClass('hide');
+            previousObject.removeClass('previousContent');
+
+            newObject.toggleClass('hide');
+            newObject.addClass('previousContent');
+        });
+    });
+</script>

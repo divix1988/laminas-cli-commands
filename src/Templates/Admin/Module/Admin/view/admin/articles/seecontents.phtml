@@ -1,0 +1,110 @@
+<?= $this->partial('admin/_shared/articles_menu.phtml'); ?>
+
+<div class="col-sm-9">
+
+<div class="adminRight floatLeft">
+   <div class="adminBox">
+        <div class="adminBoxHeader">
+            <h1>Page Name: <?= $title ?></h1>
+        </div>
+        <div class="adminBoxContent">
+         <div class="adminPageContents">
+            <?php if (!empty($contents)): ?>
+                <div class="separator"> </div>
+                <h1>Manage contents</h1>
+                <?php foreach ($contents as $entry): ?>
+                   <form action="" method="post" class="styledForm ajaxForm" id="contentConatiner_<?= $entry['content_id'] ?>">
+                      <input type="hidden" name="contentID" value="<?= $entry['content_id'] ?>" class="contentID" />
+                      <a href="<?= $this->url('admin/articles', ['action' => 'unlinkcontent', 'id' => $entry['page_id'], 'content_id' => $entry['content_id']]) ?>" class="deleteIcon floatRight confirm">Unlink content</a>
+                      <fieldset>
+                         <h2 class="title"><?= $entry['name'] ?></h2>
+                      </fieldset>
+                      <fieldset>
+                         <label>Language: </label>
+                         <select name="lang" class="changeLang">
+                            <?php foreach ($entry['langs'] as $language): ?>
+                            <option><?= $language['lang'] ?></option>
+                            <?php endforeach; ?>
+                         </select>
+                      </fieldset>
+                      <?php foreach ($entry['langs'] as $index => $language): ?>
+                         <input type="hidden" name="langID_<?= $language['lang'] ?>" class="langID_<?= $language['lang'] ?>" value="<?= $language['id'] ?>" />
+                         <fieldset class="<?= $index != 0 ? 'hide' : 'previousContent' ?> langContainer_<?= $language['lang'] ?>">
+                            <label>Contents: </label>
+                            <textarea name="contents_<?= $language['lang'] ?>" class="contents contents_<?= $language['lang'] ?>" id="ckeditor_<?= $entry['content_id'].$language['lang'] ?>">
+                               <?= $language['content'] ?>
+                            </textarea>
+                         </fieldset>
+                         <script>
+                            $(function () {
+                                CKEDITOR.replace('ckeditor_<?= $entry['content_id'].$language['lang'] ?>');
+                            });
+                       </script>
+                      <?php endforeach; ?>
+                      <!-- <input type="submit" class="textButton" value="Save Contents" /> -->
+                   </form>
+                <?php endforeach; ?>
+            <?php endif; ?>
+            
+            <div class="separator"> </div>
+            <h1>Link contents to this page</h1>
+            <form action="<?= $this->url('admin/articles', ['action' => 'assignContent', 'id' => $pageID]) ?>" method="post" class="styledForm">
+               <fieldset>
+                  <label>Contents: </label>
+                  <select name="selectedContentID">
+                     <?php foreach ($availableContents as $content): ?>
+                        <option value="<?= $content['id'] ?>"><?= $content['name'] ?></option>
+                     <?php endforeach; ?>
+                  </select>
+               </fieldset>
+               <input type="submit" class="btn btn-primary" value="Link content" />
+            </form>
+         </div>
+      </div>
+   </div>
+
+</div>
+<div class="clearFloat"> </div>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+         
+        function showPleaseWait() {
+            $.confirm({
+                'title'		: 'Please Wait..',
+                'message'	: 'Your request is processing. Please Wait.. <br />Please do not refresh this page.',
+                'buttons'       : {}
+            });
+        }
+
+        $('.changeLang').change(function() {
+           selectedLang = $(this).val();
+           formObject = $(this).parent().parent();
+           contentID = formObject.find('.contentID').val();
+           previousObject = $('#contentConatiner_'+contentID+' .previousContent');
+           newObject = $('#contentConatiner_'+contentID+' .langContainer_'+selectedLang);
+
+           previousObject.toggleClass('hide');
+           previousObject.removeClass('previousContent');
+
+           newObject.toggleClass('hide');
+           newObject.addClass('previousContent');
+       });
+
+       $('.ajaxForm').submit(function() {
+           showPleaseWait();
+           thisLang = $(this).find('.changeLang').val();
+           thisLangID = $(this).find('.langID_'+thisLang).val();
+           thisContent = $(this).find('.contents_'+thisLang).val();
+           $.ajax({
+              url: "<?= $this->url() ?>/ajax/cms/savelangcontent",
+              type: "POST",
+              data: { langID: thisLangID, contents: thisContent  }
+              }).done(function( msg ) {
+                $.confirm.hide();
+              });
+
+           return false;
+        });
+    });
+</script>

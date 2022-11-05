@@ -22,6 +22,7 @@ class UserFormHydrator implements \Laminas\Hydrator\Strategy\StrategyInterface
         $hashedPassword = $this->securityHelper->sha512($data[$form::FIELDSET_LOGIN][Form\UserLoginFieldset::ELEMENT_PASSWORD]);
         
         return [
+            'username' => $data[$form::FIELDSET_USERNAME][Form\UsernameFieldset::ELEMENT_USERNAME],
             'email' => $data[$form::FIELDSET_LOGIN][Form\UserLoginFieldset::ELEMENT_EMAIL],
             'password' => $hashedPassword['hash'],
             'password_salt' => $hashedPassword['salt']

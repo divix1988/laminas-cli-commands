@@ -1,0 +1,22 @@
+<?= $this->partial('admin/_shared/articles_menu.phtml'); ?>
+
+<div class="col-sm-9">
+   
+   <div class="adminBox">
+      <div class="adminBoxHeader">
+          <h3>Add new page</h3>
+      </div>
+      <div class="adminBoxContent">
+         <?= $this->messages ?>
+         <?php
+            echo $this->form()->openTag($addPageForm);
+            echo $this->formRow($addPageForm->get('name'));
+            echo $this->formRow($addPageForm->get('url'));
+            echo $this->formRow($addPageForm->get('parent_id'));
+            echo $this->formSubmit($addPageForm->get('submit'));
+            echo $this->form()->closeTag();
+        ?>
+      </div>
+   </div>
+   
+</div>

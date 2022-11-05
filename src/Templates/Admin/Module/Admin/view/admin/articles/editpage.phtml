@@ -1,0 +1,85 @@
+<?= $this->partial('admin/_shared/articles_menu.phtml'); ?>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+                
+            $('#changeLang').change(function() {
+               selectedLang = $(this).val();
+               formObject = $(this).parent().parent();
+               previousObject = $('.previousContent');
+               newObject = $('.langContainer_'+selectedLang);
+
+               previousObject.hide('slow');
+               previousObject.removeClass('previousContent');
+
+               newObject.show('slow');
+               newObject.addClass('previousContent');
+           });
+     });
+</script>
+
+<div class="col-sm-9">
+   
+   <div class="adminBox">
+      <div class="adminBoxContent">
+	 
+         <h1>Edit Page</h1>
+         <?php
+            echo $this->form()->openTag($editPageForm);
+            echo $this->formRow($editPageForm->get('name'));
+            echo $this->formRow($editPageForm->get('url'));
+            echo $this->formRow($editPageForm->get('parent_id'));
+            echo $this->formSubmit($editPageForm->get('submit'));
+            echo $this->form()->closeTag();
+        ?>
+	 
+         <?php if (!empty($pageMetadata)): ?>
+            <div class="separator"> </div>
+            <h1>Edit metadata info:</h1>
+
+            <form action="<?= $this->url('admin/articles', ['action' => 'editpagemetadata', 'id' => $pageId]); ?>" method="post" class="styledForm">
+               <fieldset>
+                  <label>Choose language: </label>
+                  <select name="lang" id="changeLang">
+                     <?php foreach ($pageMetadata as $entry): ?>
+                     <option><?= $entry['lang'] ?></option>
+                     <?php endforeach; ?>
+                  </select>
+               </fieldset>
+               <?php foreach ($pageMetadata as $index => $entry): ?>
+                  <input type="hidden" name="metadataID_<?= $entry['lang'] ?>" class="langID_<?= $entry['lang'] ?>" value="<?= $entry['id'] ?>" />
+                  <fieldset class="<?= $index != 0 ? 'hide' : 'previousContent' ?> langContainer_<?= $entry['lang'] ?>">
+                     <fieldset>
+                        <label>Title: </label>
+                        <input type="text" class="inputField inputFieldLong" name="title_<?= $entry['lang'] ?>" value="<?= $entry['title'] ?>" />
+                     </fieldset>
+                     <fieldset>
+                        <label>Description: </label>
+                        <input type="text" class="inputField inputFieldLong" name="description_<?= $entry['lang'] ?>" value="<?= $entry['description'] ?>" />
+                     </fieldset>
+                     <fieldset>
+                        <label>Keywords: </label>
+                        <input type="text" class="inputField inputFieldLong" name="keywords_<?= $entry['lang'] ?>" value="<?= $entry['keywords'] ?>" />
+                     </fieldset>
+                  </fieldset>
+               <?php endforeach; ?>
+               <br />
+               <input type="submit" class="btn btn-primary" value="Save" />
+            </form>
+        <?php endif; ?>
+         
+         <div class="separator"> </div>
+         <h1>Add new language version:</h1>
+         <?php
+            echo $this->form()->openTag($addPageDetails);
+            echo $this->formRow($addPageDetails->get('language'));
+            echo $this->formRow($addPageDetails->get('title'));
+            echo $this->formRow($addPageDetails->get('description'));
+            echo $this->formRow($addPageDetails->get('keywords'));
+            echo $this->formSubmit($addPageDetails->get('submit'));
+            echo $this->form()->closeTag();
+        ?>
+      </div>
+   </div>
+   
+</div>

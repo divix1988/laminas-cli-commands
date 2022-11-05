@@ -32,35 +32,25 @@ class AdminPanelCommand extends AbstractCommand
         
         $moduleName = $this->getModuleName($input, $output, 'rowset');
         
-        /*$section1->writeln('Start creating new Model.');
-        $this->generateModel($moduleName, 'User', $output, $properties);
-        $section1->writeln('End creating new Model.');
+        $section1->writeln('Start creating new Controllers.');
+        $this->createStaticController($moduleName, 'Admin/Controller', 'AbstractController.php', $section2);
+        $this->createStaticController($moduleName, 'Admin/Controller', 'AdminController.php', $section2);
         
-        $section1->writeln('Start creating new Rowset.');
-        $this->generateRowset($moduleName, 'User', $output, $properties);
-        $section1->writeln('End creating new Rowset.');*/
+        $section1->writeln('Start creating new Module.');
+        $this->createStaticModule('Admin', $section2);
+        $section1->writeln('Start creating config gobal file.');
+        $this->createStaticConfig('Admin', 'lmc_rbac.global.php', $section2, true);
+        
+        $section1->writeln('Start modyfing modules file.');
+        $this->modifyModulesConfigFile('Admin', $section2, "'Application'");
+        $this->modifyModulesConfigFile('LmcRbacMvc', $section2, ']');
+        
+        $section1->writeln('Start modyfing composer.json file.');
+        $this->modifyComposerFile('"Admin\\\": "module/Admin/src/",', $section2, '"Application\\\": "module/Application/src/",');
+        
+        $section1->writeln('!!! PLEASE RUN composer update TO UPDATE AUTOLOADER OF THE NEW ADMIN MODULE !!!');
 
-        $this->createSimplePHP($moduleName, 'Module.php', $section2);
-        $this->createSimplePHP($moduleName, 'ConfigProvider.php', $section2);
-        $this->createSimplePHP($moduleName, 'Navigation/Service/AdminNavigationFactory.php', $section2);
-        
-        $this->createStaticView($moduleName, 'AdminPanel/View', 'layout/admin.phtml', $section2);
-        $this->createStaticView($moduleName, 'AdminPanel/View', 'admin/admin/index.phtml', $section2);
-        $this->createStaticView($moduleName, 'AdminPanel/View', 'admin/_shared/footer.phtml', $section2);
-        $this->createStaticView($moduleName, 'AdminPanel/View', 'admin/_shared/menu.phtml', $section2);
-        
-        $this->createStaticController($moduleName, 'AdminPanel/Controller', 'AbstractController.php', $section2);
-        $this->createStaticController($moduleName, 'AdminPanel/Controller', 'AdminController.php', $section2);
-        $this->createStaticConfig($moduleName, 'config/module.config.php', $section2);
-        /*$this->createStaticForm($moduleName, 'UsernameFieldset', $section2);
-        $this->createUserRegisterForm($moduleName, $properties, $section2);
-        
-        
-        $this->createLoginController($moduleName, $section2);
-        $this->createLoginView($moduleName, $section2);
-        $this->createUserController($moduleName, $section2);
-        $this->createUserView($moduleName, $section2);*/
-        
+        $section1->writeln('Start injecting config lines.');
         $this->injectConfigCodes([
             'autoload/global.php' => [
                 'session' => 
