@@ -45,6 +45,9 @@ class AdminPanelCommand extends AbstractCommand
         $this->modifyModulesConfigFile('Admin', $section2, "'Application'");
         $this->modifyModulesConfigFile('LmcRbacMvc', $section2, ']');
         
+        $section1->writeln('Start modyfing Rowset/User.php.');
+        $this->alterUserRowset($moduleName, $section2);
+        
         $section1->writeln('Start modyfing composer.json file.');
         $this->modifyComposerFile('"Admin\\\": "module/Admin/src/",', $section2, '"Application\\\": "module/Application/src/",');
         
@@ -103,8 +106,37 @@ class AdminPanelCommand extends AbstractCommand
         if ($this->isJsonMode()) {
             $code = (json_encode(['UserRegisterForm.php' => $abstractContents]));
             $section2->writeln($code);
+            return;
         }
         
         $this->storeFormContents('UserRegisterForm.php', $moduleName, $abstractContents);
+    }
+    
+    protected function alterUserRowset($moduleName, $section2)
+    {   
+        if ($this->isJsonMode()) {
+            $code = json_encode(['Model\Rowset\User.php' => 'implements \LmcRbacMvc\Identity\IdentityInterface
+    ...
+    public function getRoles() {
+        return [$this->getRole()];
+    }']);
+            return;
+        }
+        
+        $filePath = self::MODULE_SRC.$moduleName.self::MODULE_MODEL_SRC.'Rowset/User.php';
+        require_once($filePath);
+        $generator = new \Laminas\Code\Generator\ClassGenerator();
+        $class = new \Laminas\Code\Reflection\ClassReflection('\\'.$moduleName.'\Model\Rowset\User');
+        $rowset = $generator->fromReflection($class);
+        
+        $rowset->addMethod(
+            'getRoles',
+            [],
+            \Laminas\Code\Generator\MethodGenerator::FLAG_PUBLIC,
+'return [$this->getRole()];'
+        );
+        $rowset->setImplementedInterfaces(['\Laminas\InputFilter\InputFilterAwareInterface', '\LmcRbacMvc\Identity\IdentityInterface']);
+        
+        file_put_contents($filePath, "<?php\n".$rowset->generate());
     }
 }
