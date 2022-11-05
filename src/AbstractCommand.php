@@ -271,7 +271,7 @@ class AbstractCommand extends Command
         file_put_contents($filePath, $currentContents);
     }
     
-    protected function modifyComposerFile($newContents, $section2, $find = '}'): void
+    protected function modifyComposerFile($newContents, $section2, $newModuleName, $find = '}'): void
     {
         if ($this->isJsonMode()) {
             $code = (json_encode(['composer.json' => '    "autoload": {
