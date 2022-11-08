@@ -52,27 +52,7 @@ class MariaDbCommand extends AbstractCommand
         \'driver_options\' => [
             1002 => \'SET NAMES \\\'UTF8\\\'\',
         ],
-']],
-            $section2, null, 'main'
-        );
-        
-                $this->injectConfigCodes([
-            'autoload/global.php' => [
-                'session' => 
-'\'config\' => [
-            \'class\' => \Laminas\Session\Config\SessionConfig::class,
-            \'options\' => [
-                \'name\' => \'session_name\',
-            ],
-        ],
-        \'storage\' => \Laminas\Session\Storage\SessionArrayStorage::class,
-        \'validators\' => [
-            \Laminas\Session\Validator\RemoteAddr::class,
-            \Laminas\Session\Validator\HttpUserAgent::class,
-        ],'
-            ],
-        ], $section2, null, 'main');
-        
+']]);
         $this->injectConfigCodes([
             'autoload/global.php' => [
                 'service_manager/factories' =>

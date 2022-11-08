@@ -32,6 +32,10 @@ class AdminPanelCommand extends AbstractCommand
         
         $moduleName = $this->getModuleName($input, $output, 'rowset');
         
+        $section1->writeln('Start creating new Controllers.');
+        $this->createStaticController($moduleName, 'Admin/Controller', 'AbstractController.php', $section2);
+        $this->createStaticController($moduleName, 'Admin/Controller', 'AdminController.php', $section2);
+        
         $section1->writeln('Start creating new Module.');
         $this->createStaticModule('Admin', $section2);
         $section1->writeln('Start creating config gobal file.');
@@ -45,7 +49,7 @@ class AdminPanelCommand extends AbstractCommand
         $this->alterUserRowset($moduleName, $section2);
         
         $section1->writeln('Start modyfing composer.json file.');
-        $this->modifyComposerFile('"Admin\\\": "module/Admin/src/",', $section2, 'Admin', '"Application\\\": "module/Application/src/",');
+        $this->modifyComposerFile('"Admin\\\": "module/Admin/src/",', $section2, '"Application\\\": "module/Application/src/"');
         
         $section1->writeln('!!! PLEASE RUN composer update TO UPDATE AUTOLOADER OF THE NEW ADMIN MODULE !!!');
 
@@ -116,7 +120,6 @@ class AdminPanelCommand extends AbstractCommand
     public function getRoles() {
         return [$this->getRole()];
     }']);
-            $section2->writeln($code);
             return;
         }
         

@@ -4,7 +4,7 @@ namespace %module_name%\Controller;
 
 use Laminas\View\Model\ViewModel;
 
-class SitemapController extends extends \Laminas\Mvc\Controller\AbstractActionController
+class SitemapController extends \Laminas\Mvc\Controller\AbstractActionController
 {
     private $navigation;
 

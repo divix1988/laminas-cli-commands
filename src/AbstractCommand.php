@@ -271,7 +271,7 @@ class AbstractCommand extends Command
         file_put_contents($filePath, $currentContents);
     }
     
-    protected function modifyComposerFile($newContents, $section2, $newModuleName, $find = '}'): void
+    protected function modifyComposerFile($newContents, $section2, $find = '}'): void
     {
         if ($this->isJsonMode()) {
             $code = (json_encode(['composer.json' => '    "autoload": {
@@ -568,15 +568,17 @@ class AbstractCommand extends Command
         } else {
             throw new Exception('invalid configType');
         }
-        
+
         if (is_array($newContentContainer) && !isset($newContentContainer['contents'])) {
             throw new Exception('invalid new contents configuration');
         }
         $newContents = $newContentContainer;
+        $plainContents = $newContents;
         $identifier = null;
         
         if (is_array($newContentContainer)) {
             $newContents = $newContentContainer['contents'];
+            $plainContents = $newContents;
             
             //check if idenfier was passed to detect when adding contents to avoid duplication
             if (isset($newContentContainer['identifier'])) {
@@ -656,17 +658,21 @@ class AbstractCommand extends Command
                 //find last ] char and replace it with new section
                 $output = preg_replace("~\];\s*(.*)$~", $newContents.PHP_EOL.'];', $fileContents);
             } else {
-                //section is missing in nested level ONLY 2nd level is supported ATM
+                //section is missing in nested level, ONLY 2nd level is supported ATM
                 // @TODO
                 if (count($sectionNames) === 2) {
                     $parentSectionName = $sectionNames[0];
-                    //add parent to new contents:
-                    $newContents = $firstSectionNameString.' ['.PHP_EOL.'    '.$newContents.PHP_EOL.'    ],';
                     
-                    if (strpos($noSpacesContents, preg_replace('/\s+/', '', $parentSectionName)) > 0) {
-                        //parent exists
-                        $output = preg_replace('/(\''.$parentSectionName.'\' => )(\[((?>[^\[\]]++|(?2))*)\])/', $newContents, $fileContents);
+                    preg_match("/'$sectionNames[0]' => \[\s*\K('$sectionNames[1]' => )(\[((?>[^][]++|(?2))*)])/", $fileContents, $foundNestedSection);
+                    
+                    if (!empty($foundNestedSection[0])) {
+                        //2nd level section exists so update its content
+                        $newContents = $spaces.preg_replace("/]$/", $plainContents, $foundNestedSection[0]).PHP_EOL.$spaces.']';
+                        
+                        $output = preg_replace("/'$sectionNames[0]' => \[\s*\K('$sectionNames[1]' => )(\[((?>[^][]++|(?2))*)])/", $newContents, $fileContents);
                     } else {
+                        //add parent to new contents:
+                        $newContents = $firstSectionNameString.' ['.PHP_EOL.'    '.$newContents.PHP_EOL.'    ],';
                         //parent is missing
                         $output = preg_replace("~\];\s*(.*)$~", $newContents.PHP_EOL.'];', $fileContents);
                     }

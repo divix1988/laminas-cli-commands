@@ -45,12 +45,18 @@ class SitemapCommand extends AbstractCommand
         $name = ucfirst(rtrim($input->getArgument('name'), 's')).'Controller';
         $menuName = ucfirst(rtrim($input->getArgument('menu_name'), 's'));
                 
+        $section1->writeln('Start creating new controller.');
         $this->createStaticController($moduleName, 'Sitemap', 'SitemapController.php', $section2, $name);
+        
+        $section1->writeln('Start creating new view.');
         $this->createStaticView($moduleName, 'Sitemap/View', 'index.phtml', $section2);
         
+        $section1->writeln('Start creating new config in module.config.php');
         $this->injectConfigCodes([
             'module.config.php' => [
-                'controllers/factories' =>
+                'controllers/factories' => [
+                    'identifier' => $name,
+                    'contents' => 
 '
             Controller\\'.$name.'::class => function($sm) {
                 return new Controller\\'.$name.'(
@@ -58,7 +64,10 @@ class SitemapCommand extends AbstractCommand
                 );
             },
 ',
-                'router/routes' => 
+                ],
+                'routes' => [
+                    'identifier' => "'sitemap' => ",
+                    'contents' =>
 '    
             \'sitemap\' => [
                 \'type\' => Literal::class,
@@ -71,8 +80,10 @@ class SitemapCommand extends AbstractCommand
                 ],
             ],
 ',
+                ]
             ]
         ], $section2, $moduleName, 'module');
+        
         
         $section2->writeln('Done creating new sitemap.');
         
