@@ -52,7 +52,8 @@ class MariaDbCommand extends AbstractCommand
         \'driver_options\' => [
             1002 => \'SET NAMES \\\'UTF8\\\'\',
         ],
-']]);
+']
+        ], $section2, null, 'main');
         $this->injectConfigCodes([
             'autoload/global.php' => [
                 'service_manager/factories' =>

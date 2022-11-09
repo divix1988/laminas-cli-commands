@@ -58,7 +58,7 @@ class NavigationCommand extends AbstractCommand
         $globalPhpCode .= 
 '       ],
 ';
-        $this->injectPhtmlCodes([
+        /*$this->injectPhtmlCodes([
             'layout/layout.phtml' => 
 '
 <?= $this->navigation(\'Laminas\Navigation\\'.$name.'\')->menu()
@@ -75,31 +75,43 @@ class NavigationCommand extends AbstractCommand
         ],
         $section2,
         $moduleName
-    );
+    );*/
 
         $this->injectConfigCodes([
             'autoload/global.php' => [
-                ('navigation/'.$name) => $globalPhpCode,
-                'service_manager/abstract_factories' => 
+                ('navigation') => [
+                    'identifier' => "'$name' =>",
+                    'contents' => $globalPhpCode
+                ],
+                'service_manager/abstract_factories' => [
+                    'identifier' => 'NavigationAbstractServiceFactory',
+                    'contents' => 
 'Laminas\Navigation\Service\NavigationAbstractServiceFactory::class,'
+                ]
             ],
         ], $section2, $moduleName, 'main');
 
         $this->injectConfigCodes([
             'module.config.php' => [
-                'controllers/factories' =>
+                'controllers/factories' => [
+                    'identifier' => $name.'MenuController',
+                    'contents' => 
 '
             Controller\\'.$name.'MenuController::class => InvokableFactory::class,
-',
-                'view_manager/template_path_stack' => 
+'
+                ],
+                /*'view_manager/template_path_stack' => 
 '    
             __DIR__ . \'/../view\',
             __DIR__ . \'/../view/'.$moduleName.'/_shared\'
-',
-                'router/routes' =>
+',*/
+                'router/routes' => [
+                    'identifier' => $name.'MenuController',
+                    'contents' => 
 '
 '.$this->getRoutesCode($name, $moduleName, $inputItems).'
 '
+                ]
             ]
         ], $section2, $moduleName, 'module');
 
@@ -107,7 +119,7 @@ class NavigationCommand extends AbstractCommand
         
         if (!empty($input->getOption('include_controller'))) {
             $this->generateController($moduleName, $name, $output, $inputItems);
-            $this->generateViews($moduleName, $name, $output, $inputItems);
+            $this->generateViews($moduleName, strtolower($name).'-menu', $output, $inputItems);
         }
 
         $section2->writeln('Done creating navigation.');

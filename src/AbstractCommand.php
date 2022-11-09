@@ -620,7 +620,8 @@ class AbstractCommand extends Command
         
         if (strpos($noSpacesContents, preg_replace('/\s+/', '', $sectionNameString)) > 0) {
             //get current contents
-            preg_match('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $fileContents, $matches);
+            preg_match('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $fileContents, $parentMatches);
+            $matches = $parentMatches;
             $newContents = str_replace($sectionNameString."[", '', $newContents);
             
             //remove last closing bracket for current section
@@ -647,8 +648,11 @@ class AbstractCommand extends Command
                     $output = $fileContents;
                 }
             } else {
-                //@TODO do a support for checking each of the 2nd level section
-                $output = $fileContents;
+                //2nd level section exists so append contents to it
+                $newContents = preg_replace("/]$/", rtrim($newContents, ','), $parentMatches[0]).PHP_EOL.$spaces;
+                
+                //exit($newContents);
+                $output = preg_replace('/('.$sectionNameString.')(\[((?>[^\[\]]++|(?2))*)\])/', $newContents, $fileContents);
             }
         } else {
             //section is missing in root
