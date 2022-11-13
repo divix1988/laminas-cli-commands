@@ -58,7 +58,8 @@ class NavigationCommand extends AbstractCommand
         $globalPhpCode .= 
 '       ],
 ';
-        /*$this->injectPhtmlCodes([
+        $section1->writeln('Start creating layout.phtml section');
+        $this->injectPhtmlCodes([
             'layout/layout.phtml' => 
 '
 <?= $this->navigation(\'Laminas\Navigation\\'.$name.'\')->menu()
@@ -75,8 +76,9 @@ class NavigationCommand extends AbstractCommand
         ],
         $section2,
         $moduleName
-    );*/
+    );
 
+        $section1->writeln('Start creating config files: global.php, module.config.php');
         $this->injectConfigCodes([
             'autoload/global.php' => [
                 ('navigation') => [
@@ -115,9 +117,11 @@ class NavigationCommand extends AbstractCommand
             ]
         ], $section2, $moduleName, 'module');
 
+        $section1->writeln('Start creating new view: menu.phtml');
         $this->createStaticView($moduleName, 'Navigation/View', 'menu.phtml', $section2);
         
         if (!empty($input->getOption('include_controller'))) {
+            $section1->writeln('Start creating new controller');
             $this->generateController($moduleName, $name, $output, $inputItems);
             $this->generateViews($moduleName, strtolower($name).'-menu', $output, $inputItems);
         }

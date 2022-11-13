@@ -51,7 +51,7 @@ class ControllerCommand extends AbstractCommand
             $code = (json_encode([$name.'.php' => $controller->generate()]));
             $section2->writeln($code);
         } else {
-            $section2->writeln(trim(preg_replace('/\s\s+/', ' ', $controller->generate())));
+            //$section2->writeln(trim(preg_replace('/\s\s+/', ' ', $controller->generate())));
         }
         
         $this->storeControllerContents($name.'.php', $moduleName, '<?php'.PHP_EOL.$controller->generate());
