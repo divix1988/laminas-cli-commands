@@ -426,6 +426,10 @@ class AbstractCommand extends Command
             $newName = $filename;
         }
         
+        if (strpos($newName, '.php') === false) {
+            $newName .= '.php';
+        }
+        
         if ($this->isJsonMode()) {
             $abstractContents = str_replace("<?php", '', $abstractContents);
             $code = (json_encode([$newName => $abstractContents]));
@@ -490,16 +494,20 @@ class AbstractCommand extends Command
         $this->copyModuleFolder($newModuleName, $folderPath);
     }
     
-    protected function createStaticView($moduleName, $folder, $filename, $section2)
+    protected function createStaticView($moduleName, $folder, $filename, $section2, $newFolderName = 'admin', $viewParams = [])
     {
         $abstractContents = file_get_contents(__DIR__.'/Templates/'.$folder.'/'.$filename);
+        
+        foreach ($viewParams as $key => $viewParam) {
+            $abstractContents = str_replace("%$key%", $viewParam, $abstractContents);
+        }
         
         if ($this->isJsonMode()) {
             $code = (json_encode([$filename => $abstractContents]));
             $section2->writeln($code);
         }
         
-        $this->storeViewContents($filename, $moduleName, 'admin', $abstractContents);
+        $this->storeViewContents($filename, $moduleName, $newFolderName, $abstractContents);
     }
     
     protected function injectConfigCodes(array $input, $section, $moduleName, $configType)

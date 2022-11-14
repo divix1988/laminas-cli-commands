@@ -49,7 +49,7 @@ class SitemapCommand extends AbstractCommand
         $this->createStaticController($moduleName, 'Sitemap', 'SitemapController.php', $section2, $name);
         
         $section1->writeln('Start creating new view.');
-        $this->createStaticView($moduleName, 'Sitemap/View', 'index.phtml', $section2);
+        $this->createStaticView($moduleName, 'Sitemap/View', 'index.phtml', $section2, 'sitemap', ['menu_name' => $menuName]);
         
         $section1->writeln('Start creating new config in module.config.php');
         $this->injectConfigCodes([
