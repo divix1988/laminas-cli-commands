@@ -9,7 +9,7 @@
         "command"
     ],
     "require": {
-        "php": "^7.1",
+        "php": "^7.1 || ^8.1",
         "laminas/laminas-cli": "^1.1",
         "laminas/laminas-code": "^3.4.0"
     },
