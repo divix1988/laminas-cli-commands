@@ -462,7 +462,7 @@ class AbstractCommand extends Command
         $abstractContents = file_get_contents(__DIR__.'/Templates/'.$folder.'/'.$filename);
         
         if ($this->isJsonMode()) {
-            $code = (json_encode([$newName => $abstractContents]));
+            $code = (json_encode([$filename => $abstractContents]));
             $section2->writeln($code);
         }
         
@@ -519,32 +519,62 @@ class AbstractCommand extends Command
                     
                     foreach ($contents as $sectionName => &$newContents) {
                         $firstSectionNameString = "'".key(reset($section))."' => ";
-                    
-                        if (strpos($newContents, $firstSectionNameString) !== 0) {
-                            $sectionNames = explode('/', $sectionName);
-                            $sectionNamesReversed = array_reverse($sectionNames);
-                            $sectionNamesLength = count($sectionNames);
-                            $noSpacesContents = preg_replace('/\s+/', '', $newContents);
-                            //injected contents don't have section names include so append it
-                            foreach ($sectionNamesReversed as $index => $tempSectionName) {
-                                if (count($sectionNames) > 1 && strpos($noSpacesContents, preg_replace('/\s+/', '', $tempSectionName)) !== false) {
-                                    continue;
+                        
+                        if (is_array($newContents)) {
+                            foreach ($newContents as $newSingleContents) {
+                                if (strpos($newSingleContents, $firstSectionNameString) !== 0) {
+                                    $sectionNames = explode('/', $sectionName);
+                                    $sectionNamesReversed = array_reverse($sectionNames);
+                                    $sectionNamesLength = count($sectionNames);
+                                    $noSpacesContents = preg_replace('/\s+/', '', $newSingleContents);
+                                    //injected contents don't have section names include so append it
+                                    foreach ($sectionNamesReversed as $index => $tempSectionName) {
+                                        if (count($sectionNames) > 1 && strpos($noSpacesContents, preg_replace('/\s+/', '', $tempSectionName)) !== false) {
+                                            continue;
+                                        }
+                                        //echo 'str_pos '.$noSpacesContents, preg_replace('/\s+/', '', $tempSectionName).strpos($noSpacesContents, preg_replace('/\s+/', '', $tempSectionName)).' count: '.count($sectionNames).PHP_EOL;
+                                        $numberOfSpaces = $sectionNamesLength * 4;
+                                        $spaces = str_repeat(' ', $numberOfSpaces);
+
+                                        $newSingleContents = rtrim("'".$tempSectionName."' => [".PHP_EOL.$spaces.'    ...'.PHP_EOL.$spaces.'    '.$newSingleContents.PHP_EOL.$spaces.'],', ',');
+
+                                        $sectionNamesLength--;
+                                    }
                                 }
-                                //echo 'str_pos '.$noSpacesContents, preg_replace('/\s+/', '', $tempSectionName).strpos($noSpacesContents, preg_replace('/\s+/', '', $tempSectionName)).' count: '.count($sectionNames).PHP_EOL;
-                                $numberOfSpaces = $sectionNamesLength * 4;
-                                $spaces = str_repeat(' ', $numberOfSpaces);
 
-                                $newContents = rtrim("'".$tempSectionName."' => [".PHP_EOL.$spaces.'    ...'.PHP_EOL.$spaces.'    '.$newContents.PHP_EOL.$spaces.'],', ',');
+                                if (!isset($output[$filename])) {
+                                    $output[$filename] = '';
+                                }
 
-                                $sectionNamesLength--;
+                                $output[$filename] .= PHP_EOL.$newSingleContents.PHP_EOL.'...';
                             }
-                        }
+                        } else {
+                            if (strpos($newContents, $firstSectionNameString) !== 0) {
+                                $sectionNames = explode('/', $sectionName);
+                                $sectionNamesReversed = array_reverse($sectionNames);
+                                $sectionNamesLength = count($sectionNames);
+                                $noSpacesContents = preg_replace('/\s+/', '', $newContents);
+                                //injected contents don't have section names include so append it
+                                foreach ($sectionNamesReversed as $index => $tempSectionName) {
+                                    if (count($sectionNames) > 1 && strpos($noSpacesContents, preg_replace('/\s+/', '', $tempSectionName)) !== false) {
+                                        continue;
+                                    }
+                                    //echo 'str_pos '.$noSpacesContents, preg_replace('/\s+/', '', $tempSectionName).strpos($noSpacesContents, preg_replace('/\s+/', '', $tempSectionName)).' count: '.count($sectionNames).PHP_EOL;
+                                    $numberOfSpaces = $sectionNamesLength * 4;
+                                    $spaces = str_repeat(' ', $numberOfSpaces);
+
+                                    $newContents = rtrim("'".$tempSectionName."' => [".PHP_EOL.$spaces.'    ...'.PHP_EOL.$spaces.'    '.$newContents.PHP_EOL.$spaces.'],', ',');
+
+                                    $sectionNamesLength--;
+                                }
+                            }
                         
-                        if (!isset($output[$filename])) {
-                            $output[$filename] = '';
+                            if (!isset($output[$filename])) {
+                                $output[$filename] = '';
+                            }
+
+                            $output[$filename] .= PHP_EOL.$newContents.PHP_EOL.'...';
                         }
-                        
-                        $output[$filename] .= PHP_EOL.$newContents.PHP_EOL.'...';
                     }
                 } else {
                     $output[$filename] = '...'.PHP_EOL.$contents.PHP_EOL.'...';
